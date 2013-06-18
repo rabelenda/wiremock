@@ -90,12 +90,20 @@ public class WireMock {
 		defaultInstance.resetScenarios();
 	}
 
-    public void resetToDefaultMappings() {
-        admin.resetToDefaultMappings();
+    public void reloadMappings() {
+        admin.reloadMappings();
     }
 
-    public static void resetToDefault() {
-        defaultInstance.resetToDefaultMappings();
+    public static void reloadAllMappings() {
+        defaultInstance.reloadMappings();
+    }
+
+    public void clearRequests() {
+        admin.clearRequests();
+    }
+
+    public static void clearAllRequests() {
+        defaultInstance.clearRequests();
     }
 
 	public void register(MappingBuilder mappingBuilder) {

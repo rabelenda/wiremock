@@ -113,9 +113,9 @@ public class AdminRequestHandler extends AbstractRequestHandler {
         return ResponseDefinition.ok();
     }
 
-    @AdminOperation("/mappings/reset")
-    public ResponseDefinition resetToDefaultMappings() {
-        admin.resetToDefaultMappings();
+    @AdminOperation("/mappings/reload")
+    public ResponseDefinition reloadMappings() {
+        admin.reloadMappings();
         return ResponseDefinition.ok();
     }
 
@@ -130,25 +130,38 @@ public class AdminRequestHandler extends AbstractRequestHandler {
     public ResponseDefinition getRequestCount(Request request) {
         RequestPattern requestPattern = buildRequestPatternFrom(request.getBodyAsString());
         int matchingRequestCount = admin.countRequestsMatching(requestPattern);
-        ResponseDefinition response = new ResponseDefinition(HTTP_OK, write(new VerificationResult(matchingRequestCount)));
-        response.setHeaders(new HttpHeaders(httpHeader("Content-Type", "application/json")));
-        return response;
+        return getJsonResponse(new VerificationResult(matchingRequestCount));
     }
 
     @AdminOperation("/requests/find")
     public ResponseDefinition findRequests(Request request) {
         RequestPattern requestPattern = buildRequestPatternFrom(request.getBodyAsString());
         FindRequestsResult result = admin.findRequestsMatching(requestPattern);
-        ResponseDefinition response = new ResponseDefinition(HTTP_OK, Json.write(result));
+        return getJsonResponse(result);
+    }
+
+    private ResponseDefinition getJsonResponse(Object result) {
+        ResponseDefinition response = new ResponseDefinition(HTTP_OK, write(result));
         response.setHeaders(new HttpHeaders(httpHeader("Content-Type", "application/json")));
         return response;
     }
 
-    @AdminOperation("/settings")
+    @AdminOperation("/requests/clear")
+    public ResponseDefinition clearRequests() {
+        admin.clearRequests();
+        return ResponseDefinition.ok();
+    }
+
+    @AdminOperation("/settings/set")
     public ResponseDefinition globalSettingsUpdate(Request request) {
         GlobalSettings newSettings = Json.read(request.getBodyAsString(), GlobalSettings.class);
         admin.updateGlobalSettings(newSettings);
         return ResponseDefinition.ok();
+    }
+
+    @AdminOperation("/settings/get")
+    public ResponseDefinition globalSettingsGet() {
+        return getJsonResponse(admin.getGlobalSettings());
     }
 
     @AdminOperation("/socket-delay")

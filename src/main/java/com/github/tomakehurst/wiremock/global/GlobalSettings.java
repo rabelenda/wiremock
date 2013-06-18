@@ -17,11 +17,13 @@ package com.github.tomakehurst.wiremock.global;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+import com.google.common.base.Objects;
 
 @JsonSerialize(include=Inclusion.NON_NULL)
 public class GlobalSettings {
 
 	private Integer fixedDelay;
+    private Integer journalCapacity;
 
 	public Integer getFixedDelay() {
 		return fixedDelay;
@@ -31,6 +33,14 @@ public class GlobalSettings {
         this.fixedDelay = fixedDelay;
     }
 
+    public Integer getJournalCapacity() {
+        return journalCapacity;
+    }
+
+    public void setJournalCapacity(Integer journalCapacity) {
+        this.journalCapacity = journalCapacity;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -38,13 +48,14 @@ public class GlobalSettings {
 
         GlobalSettings that = (GlobalSettings) o;
 
-        if (fixedDelay != null ? !fixedDelay.equals(that.fixedDelay) : that.fixedDelay != null) return false;
-
-        return true;
+        if (!Objects.equal(fixedDelay, that.fixedDelay)) {
+            return false;
+        }
+        return Objects.equal(journalCapacity, that.journalCapacity);
     }
 
     @Override
     public int hashCode() {
-        return fixedDelay != null ? fixedDelay.hashCode() : 0;
+        return Objects.hashCode(fixedDelay, journalCapacity);
     }
 }

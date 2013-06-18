@@ -21,9 +21,10 @@ import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 
+import java.util.Collections;
 import java.util.List;
 
-public class DisabledRequestJournal implements RequestJournal {
+public class DisabledRequestJournal implements ImmutableCapacityJournal {
 
     public static class JournalDisabledException extends IllegalStateException {
 
@@ -48,5 +49,13 @@ public class DisabledRequestJournal implements RequestJournal {
 
     @Override
     public void requestReceived(Request request, Response response) {}
+
+    @Override
+    public void load(List<LoggedRequest> loggedRequests) {}
+
+    @Override
+    public List<LoggedRequest> getAllRequests() {
+        return Collections.emptyList();
+    }
 
 }

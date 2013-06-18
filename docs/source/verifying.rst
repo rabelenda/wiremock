@@ -10,7 +10,7 @@ Verifying
 
 .. _journal-capacity:
     By default all requests are stored in memory. This is not always the desired approach: if the stubbed service is under heavy load of requests, memory will increase linearly until filled up by requests records.
-    These kind of scenarios are probable when running WireMock in standalone, so for this purpose exists the parameter --journal-capacity. Setting it to 0 will totally disable requests recording.
+    These kind of scenarios are probable when running WireMock in standalone, so for this purpose exists the parameter --journal-capacity. Setting it to 0 will totally disable requests recording, and running any request verification will fail with JournalDisabledException.
     On the other hand by setting it to a value X greater than 0, WireMock will only hold the last X requests. Be aware that this parameter will affect any verification of requests, as the following described ones.
 
 

@@ -30,7 +30,7 @@ import java.util.List;
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
 
-public class BoundedInMemoryRequestJournal implements RequestJournal {
+public class BoundedInMemoryRequestJournal implements ImmutableCapacityJournal {
 
     private final CircularFifoBuffer requests;
 
@@ -40,13 +40,13 @@ public class BoundedInMemoryRequestJournal implements RequestJournal {
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized int countRequestsMatching(RequestPattern requestPattern) {
+    public int countRequestsMatching(RequestPattern requestPattern) {
         return size(filter((Collection<LoggedRequest>)requests, matchedBy(requestPattern)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public synchronized List<LoggedRequest> getRequestsMatching(RequestPattern requestPattern) {
+    public List<LoggedRequest> getRequestsMatching(RequestPattern requestPattern) {
         return ImmutableList.copyOf(filter((Collection<LoggedRequest>) requests, matchedBy(requestPattern)));
     }
 
@@ -59,12 +59,22 @@ public class BoundedInMemoryRequestJournal implements RequestJournal {
     }
 
     @Override
-    public synchronized void requestReceived(Request request, Response response) {
+    public void requestReceived(Request request, Response response) {
         requests.add(LoggedRequest.createFrom(request));
     }
 
     @Override
-    public synchronized void reset() {
+    public void reset() {
         requests.clear();
+    }
+
+    @Override
+    public void load(List<LoggedRequest> loggedRequests) {
+        requests.addAll(loggedRequests);
+    }
+
+    @Override
+    public List<LoggedRequest> getAllRequests() {
+        return ImmutableList.copyOf(requests);
     }
 }

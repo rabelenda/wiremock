@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.common.ProxySettings;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockApp;
+import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelayControl;
 import com.github.tomakehurst.wiremock.global.ThreadSafeRequestDelayControl;
 import com.github.tomakehurst.wiremock.http.*;
@@ -162,6 +163,7 @@ public class WireMockServer {
             }
 
             addAdminContext();
+            addUiContext();
             addMockServiceContext();
 			jettyServer.start();
 		} catch (Exception e) {
@@ -231,6 +233,20 @@ public class WireMockServer {
 		jettyServer.addHandler(adminContext);
     }
 
+    private void addUiContext() {
+        Context uiContext = new Context(jettyServer, "/__ui");
+        Map initParams = newHashMap();
+        initParams.put("org.mortbay.jetty.servlet.Default.maxCacheSize", "0");
+        initParams.put("org.mortbay.jetty.servlet.Default.resourceBase", fileSource.child("__ui").getPath());
+        initParams.put("org.mortbay.jetty.servlet.Default.dirAllowed", "false");
+        uiContext.setInitParams(initParams);
+        uiContext.addServlet(DefaultServlet.class, "/*");
+        jettyServer.addHandler(uiContext);
+    }
+
+    public void updateGlobalSettings(GlobalSettings settings) {
+        wireMockApp.updateGlobalSettings(settings);
+    }
 
     private static class NoOpMappingsLoader implements MappingsLoader {
         @Override

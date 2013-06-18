@@ -26,9 +26,12 @@ public interface Admin {
 	void addStubMapping(StubMapping stubMapping);
 	void resetMappings();
 	void resetScenarios();
-    void resetToDefaultMappings();
-	int countRequestsMatching(RequestPattern requestPattern);
+    void reloadMappings();
+    int countRequestsMatching(RequestPattern requestPattern);
     FindRequestsResult findRequestsMatching(RequestPattern requestPattern);
+    void clearRequests();
 	void updateGlobalSettings(GlobalSettings settings);
     void addSocketAcceptDelay(RequestDelaySpec spec);
+
+    GlobalSettings getGlobalSettings();
 }

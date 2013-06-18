@@ -26,4 +26,5 @@ public interface RequestJournal extends RequestListener {
 	int countRequestsMatching(RequestPattern requestPattern);
     List<LoggedRequest> getRequestsMatching(RequestPattern requestPattern);
 	void reset();
+
 }

@@ -23,15 +23,15 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
 
-public class UnboundedInMemoryRequestJournal implements RequestJournal {
+public class UnboundedInMemoryRequestJournal implements ImmutableCapacityJournal {
 
-    private final ConcurrentLinkedQueue<LoggedRequest> requests = new ConcurrentLinkedQueue<LoggedRequest>();
+    private final List<LoggedRequest> requests = new ArrayList<LoggedRequest>();
 
     @Override
     public int countRequestsMatching(RequestPattern requestPattern) {
@@ -60,4 +60,15 @@ public class UnboundedInMemoryRequestJournal implements RequestJournal {
     public void reset() {
         requests.clear();
     }
+
+    @Override
+    public void load(List<LoggedRequest> reqs) {
+        requests.addAll(reqs);
+    }
+
+    @Override
+    public List<LoggedRequest> getAllRequests() {
+        return ImmutableList.copyOf(requests);
+    }
+
 }
