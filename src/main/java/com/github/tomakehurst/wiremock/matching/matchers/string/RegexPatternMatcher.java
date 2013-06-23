@@ -1,5 +1,6 @@
 package com.github.tomakehurst.wiremock.matching.matchers.string;
 
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
 
 import java.util.regex.Matcher;
@@ -21,7 +22,7 @@ class RegexPatternMatcher extends PatternMatcher {
             for (int i=0; i<matcher.groupCount(); i++) {
                 groups[i] = matcher.group(i+1);
             }
-            return PatternMatch.matched(groups);
+            return PatternMatch.matched(new MatchedGroups(groups));
         } else {
             return PatternMatch.notMatched();
         }

@@ -17,12 +17,12 @@ package com.github.tomakehurst.wiremock.stubbing;
 
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static com.github.tomakehurst.wiremock.http.ResponseDefinition.copyOf;
 import static com.github.tomakehurst.wiremock.stubbing.StubMapping.NOT_CONFIGURED;
 
 
@@ -33,9 +33,9 @@ public class InMemoryStubMappings implements StubMappings {
 
     private class MatchingStubMapping {
         private StubMapping mapping;
-        private String[] groups;
+        private MatchedGroups groups;
 
-        public MatchingStubMapping(StubMapping mapping, String[] groups) {
+        public MatchingStubMapping(StubMapping mapping, MatchedGroups groups) {
             this.mapping = mapping;
             this.groups = groups;
         }
@@ -48,7 +48,7 @@ public class InMemoryStubMappings implements StubMappings {
 
 		notifyIfResponseNotConfigured(request, matchingMapping);
 		matchingMapping.updateScenarioStateIfRequired();
-		return copyOf(matchingMapping.getResponse(match.groups));
+		return matchingMapping.getResponse().resolved(match.groups);
 	}
 
     private MatchingStubMapping findMatchingMapping(Request request) {
@@ -60,7 +60,7 @@ public class InMemoryStubMappings implements StubMappings {
                 }
             }
         }
-        return new MatchingStubMapping(NOT_CONFIGURED, new String[]{});
+        return new MatchingStubMapping(NOT_CONFIGURED, MatchedGroups.noGroups());
     }
 
     private void notifyIfResponseNotConfigured(Request request, StubMapping matchingMapping) {

@@ -1,27 +1,27 @@
 package com.github.tomakehurst.wiremock.matching;
 
-import java.util.Arrays;
+import com.google.common.base.Objects;
 
 public class PatternMatch {
 
     private final boolean matched;
-    private final String[] groups;
+    private final MatchedGroups groups;
 
     /**
      * Stored instance to not create an instance each time
      */
-    private static final PatternMatch NOT_MATCHED = new PatternMatch(false, new String[]{});
+    private static final PatternMatch NOT_MATCHED = new PatternMatch(false, MatchedGroups.noGroups());
     /**
      * Stored instance to not create an instance each time
      */
-    private static final PatternMatch MATCHED_WITHOUT_GROUPS = new PatternMatch(true, new String[]{});
+    private static final PatternMatch MATCHED_WITHOUT_GROUPS = new PatternMatch(true, MatchedGroups.noGroups());
 
-    private PatternMatch(boolean matched, String[] groups) {
+    private PatternMatch(boolean matched, MatchedGroups groups) {
         this.matched = matched;
         this.groups = groups;
     }
 
-    public static PatternMatch matched(String[] groups) {
+    public static PatternMatch matched(MatchedGroups groups) {
         return new PatternMatch(true, groups);
     }
 
@@ -38,22 +38,16 @@ public class PatternMatch {
         return matched;
     }
 
-    public String[] getGroups() {
+    public MatchedGroups getGroups() {
         return groups;
     }
 
     public PatternMatch and(PatternMatch that) {
         if (this.matched && that.matched) {
-            return matched(concatGroups(groups, that.groups));
+            return matched(groups.add(that.groups));
         } else {
             return NOT_MATCHED;
         }
-    }
-
-    private String[] concatGroups(String[] a1, String[] a2) {
-        String[] result = Arrays.copyOf(a1, a1.length + a2.length);
-        System.arraycopy(a2, 0, result, a1.length, a2.length);
-        return result;
     }
 
     /**
@@ -67,7 +61,7 @@ public class PatternMatch {
 
     public PatternMatch or(PatternMatch that) {
         if (this.matched || that.matched) {
-            return matched(concatGroups(groups, that.groups));
+            return matched(groups.add(that.groups));
         } else {
             return NOT_MATCHED;
         }
@@ -88,16 +82,12 @@ public class PatternMatch {
 
         PatternMatch that = (PatternMatch) o;
 
-        if (matched != that.matched) return false;
-        if (!Arrays.equals(groups, that.groups)) return false;
-
-        return true;
+        return Objects.equal(matched, that.matched)
+                && Objects.equal(groups, that.groups);
     }
 
     @Override
     public int hashCode() {
-        int result = (matched ? 1 : 0);
-        result = 31 * result + (groups != null ? Arrays.hashCode(groups) : 0);
-        return result;
+        return Objects.hashCode(matched, groups);
     }
 }

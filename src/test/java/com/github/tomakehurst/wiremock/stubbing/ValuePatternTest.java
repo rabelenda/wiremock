@@ -15,13 +15,13 @@
  */
 package com.github.tomakehurst.wiremock.stubbing;
 
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
 import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
-import static org.junit.Assert.assertArrayEquals;
 
 
 public class ValuePatternTest {
@@ -38,8 +38,6 @@ public class ValuePatternTest {
     public static final String TEXT_CONTAINING_SUB_TEXT = "There's some text here";
     public static final String SOME_VALUE = "blah";
     private ValuePattern valuePattern;
-
-    private static final String[] EMPTY_GROUPS = {};
 	
 	@Before
 	public void init() {
@@ -63,12 +61,12 @@ public class ValuePatternTest {
 
     @Test
     public void emptyGroupsOnMatchesOnEqualToWithSameValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchingEqualToWith(EQUAL_TO_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchingEqualToWith(EQUAL_TO_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnMatchesOnEqualToWithOtherValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchingEqualToWith(NOT_EQUAL_TO_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchingEqualToWith(NOT_EQUAL_TO_VALUE).getGroups());
     }
 
 	@Test
@@ -88,24 +86,24 @@ public class ValuePatternTest {
 
     @Test
     public void emptyGroupsOnRegexWithoutGroupsWithMatchingValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchRegexWith(MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchRegexWith(MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnRegexWithoutGroupsWithNotMatchingValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchRegexWith(NOT_MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchRegexWith(NOT_MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void matchingGroupsOnRegexWithGroupsWithMatchingValue() {
         valuePattern.setMatches(REGEX_WITH_GROUPS);
-        assertArrayEquals(new String[]{"84"}, valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(new MatchedGroups("84"), valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnRegexWithAnonymousGroupsWithMatchingValue() {
         valuePattern.setMatches(REGEX_WITH_ANONYMOUS_GROUPS);
-        assertArrayEquals(EMPTY_GROUPS, valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
@@ -125,24 +123,24 @@ public class ValuePatternTest {
 
     @Test
     public void emptyGroupsOnNegativeRegexWithoutGroupsWithMatchingValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchNegativeRegexWith(MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchNegativeRegexWith(MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnNegativeRegexWithoutGroupsWithNotMatchingValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchNegativeRegexWith(NOT_MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchNegativeRegexWith(NOT_MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnNegativeRegexWithGroupsWithMatchingValue() {
         valuePattern.setDoesNotMatch(REGEX_WITH_GROUPS);
-        assertArrayEquals(EMPTY_GROUPS, valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor(MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
     public void emptyGroupsOnNegativeRegexWithGroupsWithNotMatchingValue() {
         valuePattern.setDoesNotMatch(REGEX_WITH_GROUPS);
-        assertArrayEquals(EMPTY_GROUPS, valuePattern.isMatchFor(NOT_MATCHING_REGEX_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor(NOT_MATCHING_REGEX_VALUE).getGroups());
     }
 
     @Test
@@ -162,12 +160,12 @@ public class ValuePatternTest {
 
     @Test
     public void emptyGroupsOnContainsWithTextContainingSubText() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchContainsWith(TEXT_CONTAINING_SUB_TEXT).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchContainsWith(TEXT_CONTAINING_SUB_TEXT).getGroups());
     }
 
     @Test
     public void emptyGroupsOnContainsWithTextNotContainingSubText() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchContainsWith(TEXT_NOT_CONTAINING_SUB_TEXT).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchContainsWith(TEXT_NOT_CONTAINING_SUB_TEXT).getGroups());
     }
 
     @Test
@@ -187,12 +185,12 @@ public class ValuePatternTest {
 
     @Test
     public void emptyGroupsOnAbsentWithNull() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchAbsentWith(null).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchAbsentWith(null).getGroups());
     }
 
     @Test
     public void emptyGroupsOnAbsentWithSomeValue() {
-        assertArrayEquals(EMPTY_GROUPS, tryMatchAbsentWith(SOME_VALUE).getGroups());
+        assertEquals(MatchedGroups.noGroups(), tryMatchAbsentWith(SOME_VALUE).getGroups());
     }
 
     @Test

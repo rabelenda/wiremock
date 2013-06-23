@@ -19,40 +19,67 @@ import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.http.HttpHeaders;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import org.junit.Test;
 
 import static com.github.tomakehurst.wiremock.http.HttpHeader.httpHeader;
-import static com.github.tomakehurst.wiremock.http.ResponseDefinition.copyOf;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertTrue;
 import static net.sf.json.test.JSONAssert.assertJsonEquals;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 public class ResponseDefinitionTest {
 
+    private static final MatchedGroups MATCHED_GROUPS = new MatchedGroups("g1","g2");
+
     @Test
-    public void copyProducesEqualObject() {
-        ResponseDefinition response = new ResponseDefinition();
+    public void resolvedProducesEqualObjectWhenStringBody() {
+        ResponseDefinition response = getResponseWithNoBody();
         response.setBody("blah");
-        response.setBodyFileName("name.json");
+        assertEquals(response, response.resolved(MATCHED_GROUPS));
+    }
+
+    @Test
+    public void resolvedProducesEqualObjectWhenBodyFileName() {
+        ResponseDefinition response = getResponseWithNoBody();
+        response.setBodyFileName("test.json");
+        assertEquals(response, response.resolved(MATCHED_GROUPS));
+    }
+
+    @Test
+    public void resolvedProducesEqualObjectWhenBase64Body() {
+        ResponseDefinition response = getResponseWithNoBody();
+        response.setBase64Body("dGVzdA==");
+        assertEquals(response, response.resolved(MATCHED_GROUPS));
+    }
+
+
+    private ResponseDefinition getResponseWithNoBody() {
+        ResponseDefinition response = new ResponseDefinition();
         response.setFault(Fault.EMPTY_RESPONSE);
         response.setHeaders(new HttpHeaders(httpHeader("thing", "thingvalue")));
         response.setFixedDelayMilliseconds(1112);
         response.setProxyBaseUrl("http://base.com");
         response.setStatus(222);
-        
-        ResponseDefinition copiedResponse = copyOf(response);
-        
-        assertTrue(response.equals(copiedResponse));
+        return response;
+    }
+
+    @Test
+    public void resolvedResolvesBodyTemplate() {
+        ResponseDefinition response = getResponseWithNoBody();
+        response.setBodyTemplate("blah %1$s -> (%1$s) %2$s");
+        ResponseDefinition expected = getResponseWithNoBody();
+        expected.setBody("blah g1 -> (g1) g2");
+        assertEquals(expected, response.resolved(MATCHED_GROUPS));
     }
     
     @Test
-    public void copyPreservesConfiguredFlag() {
+    public void resolvedPreservesConfiguredFlag() {
         ResponseDefinition response = ResponseDefinition.notConfigured();
-        ResponseDefinition copiedResponse = copyOf(response);
-        assertFalse("Should be not configured", copiedResponse.wasConfigured());
+        ResponseDefinition copiedResponse = response.resolved(MATCHED_GROUPS);
+        assertFalse(copiedResponse.wasConfigured());
     }
 
     private static final String STRING_BODY =
