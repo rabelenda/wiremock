@@ -32,6 +32,7 @@ public class ResponseDefinitionBuilder {
 	private byte[] bodyContent;
     private boolean isBinaryBody = false;
     private String bodyFileName;
+    private String bodyTemplate;
     private List<HttpHeader> headers = newArrayList();
 	private Integer fixedDelayMilliseconds;
 	private String proxyBaseUrl;
@@ -51,6 +52,11 @@ public class ResponseDefinitionBuilder {
 		this.bodyFileName = fileName;
 		return this;
 	}
+
+    public ResponseDefinitionBuilder withBodyTemplate(String bodyTemplate) {
+        this.bodyTemplate = bodyTemplate;
+        return this;
+    }
 	
 	public ResponseDefinitionBuilder withBody(String body) {
 		this.bodyContent = body.getBytes(Charset.forName(UTF_8.name()));
@@ -97,6 +103,7 @@ public class ResponseDefinitionBuilder {
         }
 		
         response.setBodyFileName(bodyFileName);
+        response.setBodyTemplate(bodyTemplate);
 		response.setFixedDelayMilliseconds(fixedDelayMilliseconds);
 		response.setProxyBaseUrl(proxyBaseUrl);
 		response.setFault(fault);
