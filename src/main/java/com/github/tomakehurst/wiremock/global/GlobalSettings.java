@@ -48,10 +48,8 @@ public class GlobalSettings {
 
         GlobalSettings that = (GlobalSettings) o;
 
-        if (!Objects.equal(fixedDelay, that.fixedDelay)) {
-            return false;
-        }
-        return Objects.equal(journalCapacity, that.journalCapacity);
+        return Objects.equal(fixedDelay, that.fixedDelay)
+            && Objects.equal(journalCapacity, that.journalCapacity);
     }
 
     @Override

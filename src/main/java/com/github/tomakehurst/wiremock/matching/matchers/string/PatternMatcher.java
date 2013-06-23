@@ -44,4 +44,7 @@ public abstract class PatternMatcher {
         return new NotPatternMatcher(this);
     }
 
+    public static PatternMatcher jsonPath(String jsonPath) {
+        return new JsonPathPatternMatcher(jsonPath);
+    }
 }

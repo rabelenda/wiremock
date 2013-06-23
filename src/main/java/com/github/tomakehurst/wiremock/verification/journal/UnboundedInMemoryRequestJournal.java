@@ -52,7 +52,7 @@ public class UnboundedInMemoryRequestJournal implements ImmutableCapacityJournal
     }
 
     @Override
-    public void requestReceived(Request request, Response response) {
+    public void requestReceived(Request request) {
         requests.add(LoggedRequest.createFrom(request));
     }
 

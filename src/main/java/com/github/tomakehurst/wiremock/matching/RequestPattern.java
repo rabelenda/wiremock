@@ -64,9 +64,7 @@ public class RequestPattern {
     }
 
     public static RequestPattern buildRequestPatternFrom(String json) {
-        RequestPattern ret = Json.read(json, RequestPattern.class);
-        ret.initMatcher();
-        return ret;
+        return Json.read(json, RequestPattern.class);
     }
 
     private void initMatcher() {

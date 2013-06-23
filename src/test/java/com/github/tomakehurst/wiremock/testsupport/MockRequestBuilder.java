@@ -31,7 +31,7 @@ public class MockRequestBuilder {
 	private String url = "/";
 	private RequestMethod method = GET;
     private List<HttpHeader> individualHeaders = newArrayList();
-    private String body = "";
+	private String body = "";
 	private boolean browserProxyRequest = false;
 	
 	private String mockName;
@@ -68,7 +68,7 @@ public class MockRequestBuilder {
 		return this;
 	}
 
-    public MockRequestBuilder withBody(String body) {
+	public MockRequestBuilder withBody(String body) {
 		this.body = body;
 		return this;
 	}

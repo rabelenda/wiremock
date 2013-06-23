@@ -36,6 +36,7 @@ public class CommandLineOptions implements Options {
     private static final String HTTPS_KEYSTORE = "https-keystore";
 	private static final String VERBOSE = "verbose";
 	private static final String ENABLE_BROWSER_PROXYING = "enable-browser-proxying";
+    private static final String DISABLE_REQUEST_JOURNAL = "no-request-journal";
     private static final String JOURNAL_CAPACITY = "journal-capacity";
 
     private final FileSource fileSource;
@@ -54,6 +55,7 @@ public class CommandLineOptions implements Options {
 		optionParser.accepts(RECORD_MAPPINGS, "Enable recording of all (non-admin) requests as mapping files");
 		optionParser.accepts(VERBOSE, "Enable verbose logging to stdout");
 		optionParser.accepts(ENABLE_BROWSER_PROXYING, "Allow wiremock to be set as a browser's proxy server");
+        optionParser.accepts(DISABLE_REQUEST_JOURNAL, "Disable the request journal (to avoid heap growth when running wiremock for long periods without reset)");
         optionParser.accepts(JOURNAL_CAPACITY, "Specify the maximum amount of requests maintained in the journal, older are discarded. If not set then journal is unbounded.").withRequiredArg();
 		optionParser.accepts(HELP, "Print this message");
 		
@@ -64,8 +66,13 @@ public class CommandLineOptions implements Options {
 
     private void validate() {
         if (optionSet.has(HTTPS_KEYSTORE) && !optionSet.has(HTTPS_PORT)) {
-            throw new IllegalStateException("HTTPS port number must be specified if specifying the keystore path");
+            throw new IllegalArgumentException("HTTPS port number must be specified if specifying the keystore path");
         }
+
+        if (recordMappingsEnabled() && (requestJournalDisabled() || Integer.valueOf(0).equals(journalCapacity()))) {
+            throw new IllegalArgumentException("Request journal must be enabled to record stubs");
+        }
+
         if (!isValidJournalCapacity()) {
             throw new IllegalArgumentException("Journal capacity, when specified, must be greater or equal to 0");
         }
@@ -174,6 +181,11 @@ public class CommandLineOptions implements Options {
 
     private boolean specifiesJournalCapacity() {
         return optionSet.has(JOURNAL_CAPACITY);
+    }
+
+    @Override
+    public boolean requestJournalDisabled() {
+        return optionSet.has(DISABLE_REQUEST_JOURNAL);
     }
 
     @Override

@@ -29,6 +29,7 @@ public class ValuePattern {
 	private String matches;
 	private String doesNotMatch;
     private Boolean absent;
+    private String matchesJsonPath;
 
     @JsonIgnore
     private PatternMatcher matcher;
@@ -49,6 +50,8 @@ public class ValuePattern {
             matcher = PatternMatcher.regex(matches);
         } else if (doesNotMatch != null) {
             matcher = PatternMatcher.regex(doesNotMatch).not();
+        } else if (matchesJsonPath != null) {
+            matcher = PatternMatcher.jsonPath(matchesJsonPath);
         } else {
             matcher = PatternMatcher.any();
         }
@@ -135,11 +138,12 @@ public class ValuePattern {
         initMatcher();
     }
 
-	public Boolean isAbsent() {
-        return absent;
+    public void setMatchesJsonPaths(String matchesJsonPath) {
+        this.matchesJsonPath = matchesJsonPath;
+        initMatcher();
     }
 
-    public String getEqualTo() {
+	public String getEqualTo() {
         return equalTo;
     }
 
@@ -155,6 +159,14 @@ public class ValuePattern {
         return doesNotMatch;
     }
 
+    public Boolean isAbsent() {
+        return absent;
+    }
+
+    public String getMatchesJsonPath() {
+        return matchesJsonPath;
+    }
+
     @Override
 	public String toString() {
         return matcher.toString();
@@ -162,7 +174,7 @@ public class ValuePattern {
 
 	@Override
 	public int hashCode() {
-        return Objects.hashCode(contains, doesNotMatch, equalTo, matches);
+        return Objects.hashCode(contains, doesNotMatch, equalTo, matches, matchesJsonPath);
 	}
 
 	@Override
@@ -180,7 +192,8 @@ public class ValuePattern {
         return Objects.equal(contains, other.contains)
                 && Objects.equal(doesNotMatch, other.doesNotMatch)
                 && Objects.equal(equalTo, other.equalTo)
-                && Objects.equal(matches, other.matches);
+                && Objects.equal(matches, other.matches)
+                && Objects.equal(matchesJsonPath, other.matchesJsonPath);
 	}
 
     public PatternMatcher getMatcher() {

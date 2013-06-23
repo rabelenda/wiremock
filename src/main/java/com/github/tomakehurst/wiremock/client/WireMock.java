@@ -20,9 +20,11 @@ import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
 import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.VerificationResult;
 
 import java.util.List;
 
@@ -61,7 +63,11 @@ public class WireMock {
 	public static void stubFor(MappingBuilder mappingBuilder) {
 		givenThat(mappingBuilder);
 	}
-	
+
+    public static ListStubMappingsResult listAllStubMappings() {
+        return defaultInstance.allStubMappings();
+    }
+
 	public static void configureFor(String host, int port) {
 		defaultInstance = new WireMock(host, port);
 	}
@@ -90,12 +96,12 @@ public class WireMock {
 		defaultInstance.resetScenarios();
 	}
 
-    public void reloadMappings() {
-        admin.reloadMappings();
+    public void resetToDefaultMappings() {
+        admin.resetToDefaultMappings();
     }
 
-    public static void reloadAllMappings() {
-        defaultInstance.reloadMappings();
+    public static void resetToDefault() {
+        defaultInstance.resetToDefaultMappings();
     }
 
     public void clearRequests() {
@@ -110,7 +116,11 @@ public class WireMock {
 		StubMapping mapping = mappingBuilder.build();
 		admin.addStubMapping(mapping);
 	}
-	
+
+    public ListStubMappingsResult allStubMappings() {
+        return admin.listAllStubMappings();
+    }
+
 	public static UrlMatchingStrategy urlEqualTo(String url) {
 		UrlMatchingStrategy urlStrategy = new UrlMatchingStrategy();
 		urlStrategy.setUrl(url);
@@ -146,7 +156,13 @@ public class WireMock {
 		headerStrategy.setDoesNotMatch(value);
 		return headerStrategy;
 	}
-	
+
+    public static ValueMatchingStrategy matchingJsonPath(String jsonPath) {
+        ValueMatchingStrategy matchingStrategy = new ValueMatchingStrategy();
+        matchingStrategy.setJsonMatchesPath(jsonPath);
+        return matchingStrategy;
+    }
+
 	public static MappingBuilder get(UrlMatchingStrategy urlMatchingStrategy) {
 		return new MappingBuilder(RequestMethod.GET, urlMatchingStrategy);
 	}
@@ -185,14 +201,20 @@ public class WireMock {
 	
 	public void verifyThat(RequestPatternBuilder requestPatternBuilder) {
 		RequestPattern requestPattern = requestPatternBuilder.build();
-		if (admin.countRequestsMatching(requestPattern) < 1) {
+        VerificationResult result = admin.countRequestsMatching(requestPattern);
+        result.assertRequestJournalEnabled();
+
+		if (result.getCount() < 1) {
 			throw new VerificationException(requestPattern, find(allRequests()));
 		}
 	}
 
 	public void verifyThat(int count, RequestPatternBuilder requestPatternBuilder) {
 		RequestPattern requestPattern = requestPatternBuilder.build();
-		if (admin.countRequestsMatching(requestPattern) != count) {
+        VerificationResult result = admin.countRequestsMatching(requestPattern);
+        result.assertRequestJournalEnabled();
+
+		if (result.getCount() != count) {
             throw new VerificationException(requestPattern, count, find(allRequests()));
 		}
 	}
@@ -207,6 +229,7 @@ public class WireMock {
 
     public List<LoggedRequest> find(RequestPatternBuilder requestPatternBuilder) {
         FindRequestsResult result = admin.findRequestsMatching(requestPatternBuilder.build());
+        result.assertRequestJournalEnabled();
         return result.getRequests();
     }
 

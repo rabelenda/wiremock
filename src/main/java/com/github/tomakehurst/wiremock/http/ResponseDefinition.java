@@ -19,6 +19,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.google.common.base.Objects;
@@ -103,7 +104,14 @@ public class ResponseDefinition {
 	public static ResponseDefinition created() {
 		return new ResponseDefinition(HTTP_CREATED, (byte[])null);
 	}
-	
+
+    public static ResponseDefinition redirectTo(String path) {
+        return new ResponseDefinitionBuilder()
+                .withHeader("Location", path)
+                .withStatus(HTTP_MOVED_TEMP)
+                .build();
+    }
+
 	public static ResponseDefinition notConfigured() {
 	    final ResponseDefinition response = new ResponseDefinition(HTTP_NOT_FOUND, (byte[])null);
 	    response.wasConfigured = false;
@@ -314,8 +322,4 @@ public class ResponseDefinition {
 	public String toString() {
 		return Json.write(this);
 	}
-
-    public ResponseDefinition resolved(String[] groups) {
-        return null;  //To change body of created methods use File | Settings | File Templates.
-    }
 }

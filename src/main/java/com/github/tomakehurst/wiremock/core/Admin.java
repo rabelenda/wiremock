@@ -18,16 +18,19 @@ package com.github.tomakehurst.wiremock.core;
 import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
+import com.github.tomakehurst.wiremock.verification.VerificationResult;
 
 public interface Admin {
 
 	void addStubMapping(StubMapping stubMapping);
+    ListStubMappingsResult listAllStubMappings();
 	void resetMappings();
 	void resetScenarios();
-    void reloadMappings();
-    int countRequestsMatching(RequestPattern requestPattern);
+    void resetToDefaultMappings();
+	VerificationResult countRequestsMatching(RequestPattern requestPattern);
     FindRequestsResult findRequestsMatching(RequestPattern requestPattern);
     void clearRequests();
 	void updateGlobalSettings(GlobalSettings settings);

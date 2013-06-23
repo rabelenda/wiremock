@@ -13,7 +13,7 @@ To add WireMock to your Java project, put the following in the dependencies sect
     <dependency>
         <groupId>com.github.tomakehurst</groupId>
         <artifactId>wiremock</artifactId>
-        <version>1.32</version>
+        <version>1.34</version>
 
         <!-- Include this if you have dependency conflicts for Guava, Jetty, Jackson or Apache HTTP Client -->
         <classifier>standalone</classifier>
@@ -125,6 +125,17 @@ server directly:
 
     wireMockServer.stop();
 
+If you've changed the port number and/or you're running the server on another host, you'll need to tell the client:
+
+.. code-block:: java
+
+    WireMock.configureFor("wiremock.host", 8089);
+
+And if you've deployed it into a servlet container under a path other than root you'll need to set that too:
+
+.. code-block:: java
+
+    WireMock.configureFor("tomcat.host", 8080, "/wiremock");
 
 Running standalone
 ==================
@@ -136,6 +147,8 @@ This will start the server on port 8080:
 .. parsed-literal::
 
     $ java -jar wiremock-|version|-standalone.jar
+
+You can `download the standalone JAR from here <http://repo1.maven.org/maven2/com/github/tomakehurst/wiremock/1.33/wiremock-1.34-standalone.jar>`_.
 
 Supported command line options are:
 
@@ -170,6 +183,11 @@ or
 
 ``--enable-browser-proxying``:
 Run as a browser proxy. See :ref:`browser-proxying`.
+
+``--no-request-journal``:
+Disable the request journal, which records incoming requests for later verification. This allows WireMock to be run
+(and serve stubs) for long periods (without resetting) without exhausting the heap. The ``--record-mappings`` option isn't
+available if this one is specified.
 
 ``--journal-capacity``:
 Set the capacity of the in memory journal. See :ref:`journal-capacity`.
@@ -234,6 +252,12 @@ After restarting the server you should be able to do this:
 
 See :ref:`stubbing` and :ref:`verifying` for more on the JSON API.
 
+Fetching all of your stub mappings (and checking WireMock is working)
+---------------------------------------------------------------------
+A GET request to the root admin URL e.g ``http://localhost:8080/__admin`` will return all currently registered stub mappings. This is a useful way to check
+whether WireMock is running on the host and port you expect:
+
+
 
 Deploying into a servlet container
 ==================================
@@ -243,8 +267,5 @@ fault injection and browser proxying won't work, __files won't be treated as a d
 This has only really been tested in Tomcat 6 and Jetty, so YMMV. Running standalone is definitely the preferred option.
 
 The easiest way to create a WireMock WAR project is to clone the `sample app <https://github.com/tomakehurst/wiremock/tree/master/sample-war>`_
-
-
-
 
 

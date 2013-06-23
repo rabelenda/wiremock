@@ -24,10 +24,10 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
 import com.github.tomakehurst.wiremock.stubbing.InMemoryStubMappings;
+import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
-import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.*;
 import com.github.tomakehurst.wiremock.verification.journal.MutableCapacityJournal;
 
 import java.util.List;
@@ -82,7 +82,7 @@ public class WireMockApp implements StubServer, Admin {
     @Override
     public ResponseDefinition serveStubFor(Request request) {
         ResponseDefinition responseDefinition = stubMappings.serveFor(request);
-        requestJournal.requestReceived(request, null);
+        requestJournal.requestReceived(request);
         if (!responseDefinition.wasConfigured() && request.isBrowserProxyRequest() && browserProxyingEnabled) {
             return ResponseDefinition.browserProxy(request);
         }
@@ -96,6 +96,11 @@ public class WireMockApp implements StubServer, Admin {
     }
 
     @Override
+    public ListStubMappingsResult listAllStubMappings() {
+        return new ListStubMappingsResult(stubMappings.getAll());
+    }
+
+    @Override
     public void resetMappings() {
         stubMappings.reset();
         requestJournal.reset();
@@ -103,7 +108,7 @@ public class WireMockApp implements StubServer, Admin {
     }
 
     @Override
-    public void reloadMappings() {
+    public void resetToDefaultMappings() {
         stubMappings.reset();
         loadDefaultMappings();
     }
@@ -114,14 +119,22 @@ public class WireMockApp implements StubServer, Admin {
     }
 
     @Override
-    public int countRequestsMatching(RequestPattern requestPattern) {
-        return requestJournal.countRequestsMatching(requestPattern);
+    public VerificationResult countRequestsMatching(RequestPattern requestPattern) {
+        try {
+            return VerificationResult.withCount(requestJournal.countRequestsMatching(requestPattern));
+        } catch (RequestJournalDisabledException e) {
+            return VerificationResult.withRequestJournalDisabled();
+        }
     }
 
     @Override
     public FindRequestsResult findRequestsMatching(RequestPattern requestPattern) {
-        List<LoggedRequest> requests = requestJournal.getRequestsMatching(requestPattern);
-        return new FindRequestsResult(requests);
+        try {
+            List<LoggedRequest> requests = requestJournal.getRequestsMatching(requestPattern);
+            return FindRequestsResult.withRequests(requests);
+        } catch (RequestJournalDisabledException e) {
+            return FindRequestsResult.withRequestJournalDisabled();
+        }
     }
 
     @Override

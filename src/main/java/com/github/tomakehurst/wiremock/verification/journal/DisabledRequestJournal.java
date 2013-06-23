@@ -26,29 +26,21 @@ import java.util.List;
 
 public class DisabledRequestJournal implements ImmutableCapacityJournal {
 
-    public static class JournalDisabledException extends IllegalStateException {
-
-        public String getMessage() {
-            return "Journal is disabled";
-        }
-
-    }
-
     @Override
     public int countRequestsMatching(RequestPattern requestPattern) {
-        throw new JournalDisabledException();
+        throw new RequestJournalDisabledException();
     }
 
     @Override
     public List<LoggedRequest> getRequestsMatching(RequestPattern requestPattern) {
-        throw new JournalDisabledException();
+        throw new RequestJournalDisabledException();
     }
 
     @Override
     public void reset() {}
 
     @Override
-    public void requestReceived(Request request, Response response) {}
+    public void requestReceived(Request request) {}
 
     @Override
     public void load(List<LoggedRequest> loggedRequests) {}

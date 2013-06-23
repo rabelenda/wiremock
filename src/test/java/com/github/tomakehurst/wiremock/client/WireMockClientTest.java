@@ -17,9 +17,13 @@ package com.github.tomakehurst.wiremock.client;
 
 import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.core.Admin;
+import com.github.tomakehurst.wiremock.http.RequestMethod;
+import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.testsupport.MappingJsonSamples;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.VerificationResult;
 import com.google.common.collect.ImmutableList;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
@@ -27,10 +31,6 @@ import org.jmock.integration.junit4.JMock;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.matching.RequestPattern;
-import com.github.tomakehurst.wiremock.testsupport.MappingJsonSamples;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
@@ -167,7 +167,7 @@ public class WireMockClientTest {
 	public void shouldVerifyRequestMadeWhenCountMoreThan0() {
 		context.checking(new Expectations() {{
 			allowing(admin).countRequestsMatching(
-                    new RequestPattern(RequestMethod.DELETE, "/to/delete")); will(returnValue(3));
+                    new RequestPattern(RequestMethod.DELETE, "/to/delete")); will(returnValue(VerificationResult.withCount(3)));
 		}});
 		
 		UrlMatchingStrategy urlStrategy = new UrlMatchingStrategy();
@@ -178,9 +178,9 @@ public class WireMockClientTest {
 	@Test(expected=VerificationException.class)
 	public void shouldThrowVerificationExceptionWhenVerifyingRequestNotMatching() {
 		context.checking(new Expectations() {{
-			allowing(admin).countRequestsMatching(with(any(RequestPattern.class))); will(returnValue(0));
+			allowing(admin).countRequestsMatching(with(any(RequestPattern.class))); will(returnValue(VerificationResult.withCount(0)));
             allowing(admin).findRequestsMatching(with(any(RequestPattern.class)));
-                will(returnValue(new FindRequestsResult(ImmutableList.<LoggedRequest>of())));
+                will(returnValue(FindRequestsResult.withRequests(ImmutableList.<LoggedRequest>of())));
 		}});
 		
 		UrlMatchingStrategy urlStrategy = new UrlMatchingStrategy();

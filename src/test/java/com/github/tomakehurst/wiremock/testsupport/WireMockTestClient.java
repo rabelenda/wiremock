@@ -41,7 +41,7 @@ public class WireMockTestClient {
 	private static final String LOCAL_WIREMOCK_ROOT = "http://localhost:%d%s";
 	private static final String LOCAL_WIREMOCK_NEW_RESPONSE_URL = "http://localhost:%d/__admin/mappings/new";
 	private static final String LOCAL_WIREMOCK_RESET_URL = "http://localhost:%d/__admin/reset";
-	private static final String LOCAL_WIREMOCK_RESET_DEFAULT_MAPPINS_URL = "http://localhost:%d/__admin/mappings/reload";
+	private static final String LOCAL_WIREMOCK_RESET_DEFAULT_MAPPINS_URL = "http://localhost:%d/__admin/mappings/reset";
 
 	private int port;
 	

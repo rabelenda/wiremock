@@ -19,7 +19,9 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
+import com.google.common.collect.ImmutableList;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
@@ -92,5 +94,10 @@ public class InMemoryStubMappings implements StubMappings {
 			scenario.reset();
 		}
 	}
+
+    @Override
+    public List<StubMapping> getAll() {
+        return ImmutableList.copyOf(mappings);
+    }
 
 }

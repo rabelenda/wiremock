@@ -15,40 +15,35 @@
  */
 package com.github.tomakehurst.wiremock.client;
 
+import com.github.tomakehurst.wiremock.admin.*;
 import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
 import com.github.tomakehurst.wiremock.http.HttpClientFactory;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
 import com.github.tomakehurst.wiremock.verification.VerificationResult;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
+import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
 import static com.github.tomakehurst.wiremock.common.HttpClientUtils.getEntityAsStringAndCloseStream;
 import static com.github.tomakehurst.wiremock.http.MimeType.JSON;
-import static com.github.tomakehurst.wiremock.verification.VerificationResult.buildVerificationResultFrom;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 
 public class HttpAdminClient implements Admin {
 	
 	private static final String ADMIN_URL_PREFIX = "http://%s:%d%s/__admin";
-	private static final String LOCAL_WIREMOCK_NEW_RESPONSE_URL = ADMIN_URL_PREFIX + "/mappings/new";
-    private static final String LOCAL_WIREMOCK_RELOAD_MAPPINGS_URL = ADMIN_URL_PREFIX + "/mappings/reload";
-	private static final String LOCAL_WIREMOCK_RESET_URL = ADMIN_URL_PREFIX + "/reset";
-    private static final String LOCAL_WIREMOCK_RESET_SCENARIOS_URL = ADMIN_URL_PREFIX + "/scenarios/reset";
-    private static final String LOCAL_WIREMOCK_COUNT_REQUESTS_URL = ADMIN_URL_PREFIX + "/requests/count";
-    private static final String LOCAL_WIREMOCK_FIND_REQUESTS_URL = ADMIN_URL_PREFIX + "/requests/find";
-    private static final String LOCAL_WIREMOCK_CLEAR_REQUESTS_URL = ADMIN_URL_PREFIX + "/requests/clear";
-	private static final String WIREMOCK_SET_GLOBAL_SETTINGS_URL = ADMIN_URL_PREFIX + "/settings/set";
-    private static final String WIREMOCK_GET_GLOBAL_SETTINGS_URL = ADMIN_URL_PREFIX + "/settings/get";
-    private static final String SOCKET_ACCEPT_DELAY_URL = ADMIN_URL_PREFIX + "/socket-delay";
-	
+
 	private final String host;
 	private final int port;
 	private final String urlPathPrefix;
@@ -69,97 +64,67 @@ public class HttpAdminClient implements Admin {
 
 	@Override
 	public void addStubMapping(StubMapping stubMapping) {
-        String json = Json.write(stubMapping);
-		int status = postJsonAndReturnStatus(getAdminUrl(LOCAL_WIREMOCK_NEW_RESPONSE_URL), json);
-		if (status != HTTP_CREATED) {
-			throw new RuntimeException("Returned status code was " + status);
-		}
+        postJsonAssertOkAndReturnBody(
+                urlFor(NewStubMappingTask.class),
+                Json.write(stubMapping),
+                HTTP_CREATED);
 	}
 
-    private String getAdminUrl(String urlTemplate) {
-        return String.format(urlTemplate, host, port, urlPathPrefix);
-    }
-
-    private int postJsonAndReturnStatus(String url, String json) {
-        HttpPost post = new HttpPost(url);
-        try {
-            if (json != null) {
-                post.setEntity(new StringEntity(json, JSON.toString(), "utf-8"));
-            }
-            HttpResponse response = httpClient.execute(post);
-            int statusCode = response.getStatusLine().getStatusCode();
-            getEntityAsStringAndCloseStream(response);
-
-            return statusCode;
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public ListStubMappingsResult listAllStubMappings() {
+        String body = getJsonAssertOkAndReturnBody(
+                urlFor(RootTask.class),
+                HTTP_OK);
+        return Json.read(body, ListStubMappingsResult.class);
     }
 
     @Override
 	public void resetMappings() {
-		int status = postEmptyBodyAndReturnStatus(getAdminUrl(LOCAL_WIREMOCK_RESET_URL));
-		assertStatusOk(status);
+		postJsonAssertOkAndReturnBody(urlFor(ResetTask.class), null, HTTP_OK);
 	}
 
-    private int postEmptyBodyAndReturnStatus(String url) {
-        return postJsonAndReturnStatus(url, null);
-    }
-
-    @Override
-	public void resetScenarios() {
-		int status = postEmptyBodyAndReturnStatus(getAdminUrl(LOCAL_WIREMOCK_RESET_SCENARIOS_URL));
-		assertStatusOk(status);
-	}
-
-    @Override
-    public void reloadMappings() {
-        int status = postEmptyBodyAndReturnStatus(getAdminUrl(LOCAL_WIREMOCK_RELOAD_MAPPINGS_URL));
-        assertStatusOk(status);
-    }
-
-    private void assertStatusOk(int status) {
-		if (status != HTTP_OK) {
-			throw new RuntimeException("Returned status code was " + status);
-		}
-	}
-	
 	@Override
-	public int countRequestsMatching(RequestPattern requestPattern) {
-		String json = Json.write(requestPattern);
-		String body = postJsonAssertOkAndReturnBody(getAdminUrl(LOCAL_WIREMOCK_COUNT_REQUESTS_URL), json, HTTP_OK);
-		VerificationResult verificationResult = buildVerificationResultFrom(body);
-		return verificationResult.getCount();
+	public void resetScenarios() {
+        postJsonAssertOkAndReturnBody(urlFor(ResetScenariosTask.class), null, HTTP_OK);
 	}
 
-    private String postJsonAssertOkAndReturnBody(String url, String json, int expectedStatus) {
-        HttpPost post = new HttpPost(url);
-        try {
-            if (json != null) {
-                post.setEntity(new StringEntity(json, JSON.toString(), "utf-8"));
-            }
-            HttpResponse response = httpClient.execute(post);
-            int statusCode = response.getStatusLine().getStatusCode();
-            if (statusCode != expectedStatus) {
-                throw new VerificationException(
-                        "Expected status " + expectedStatus + " for " + url + " but was " + statusCode);
-            }
-
-            return getEntityAsStringAndCloseStream(response);
-        } catch (RuntimeException re) {
-            throw re;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    @Override
+    public void resetToDefaultMappings() {
+        postJsonAssertOkAndReturnBody(urlFor(ResetToDefaultMappingsTask.class), null, HTTP_OK);
     }
+
+	@Override
+	public VerificationResult countRequestsMatching(RequestPattern requestPattern) {
+		String body = postJsonAssertOkAndReturnBody(
+                urlFor(GetRequestCountTask.class),
+                Json.write(requestPattern),
+                HTTP_OK);
+		return VerificationResult.from(body);
+	}
 
     @Override
     public FindRequestsResult findRequestsMatching(RequestPattern requestPattern) {
-        String json = Json.write(requestPattern);
-        String body = postJsonAssertOkAndReturnBody(getAdminUrl(LOCAL_WIREMOCK_FIND_REQUESTS_URL), json, HTTP_OK);
+        String body = postJsonAssertOkAndReturnBody(
+                urlFor(FindRequestsTask.class),
+                Json.write(requestPattern),
+                HTTP_OK);
         return Json.read(body, FindRequestsResult.class);
+    }
+
+    @Override
+	public void updateGlobalSettings(GlobalSettings settings) {
+        postJsonAssertOkAndReturnBody(
+                urlFor(GlobalSettingsUpdateTask.class),
+                Json.write(settings),
+                HTTP_OK);
+	}
+
+    @Override
+    public void addSocketAcceptDelay(RequestDelaySpec spec) {
+        postJsonAssertOkAndReturnBody(
+                urlFor(SocketDelayTask.class),
+                Json.write(spec),
+                HTTP_OK);
     }
 
     @Override
@@ -169,21 +134,48 @@ public class HttpAdminClient implements Admin {
     }
 
     @Override
-	public void updateGlobalSettings(GlobalSettings settings) {
-		String json = Json.write(settings);
-		postJsonAssertOkAndReturnBody(getAdminUrl(WIREMOCK_SET_GLOBAL_SETTINGS_URL), json, HTTP_OK);
-	}
-
-    @Override
     public GlobalSettings getGlobalSettings() {
         String body = postJsonAssertOkAndReturnBody(getAdminUrl(WIREMOCK_GET_GLOBAL_SETTINGS_URL), null, HTTP_OK);
         return Json.read(body, GlobalSettings.class);
     }
 
-    @Override
-    public void addSocketAcceptDelay(RequestDelaySpec spec) {
-        String json = Json.write(spec);
-        postJsonAssertOkAndReturnBody(getAdminUrl(SOCKET_ACCEPT_DELAY_URL), json, HTTP_OK);
+	private String postJsonAssertOkAndReturnBody(String url, String json, int expectedStatus) {
+		HttpPost post = new HttpPost(url);
+		try {
+			if (json != null) {
+				post.setEntity(new StringEntity(json, APPLICATION_JSON));
+			}
+			HttpResponse response = httpClient.execute(post);
+            int statusCode = response.getStatusLine().getStatusCode();
+			if (statusCode != expectedStatus) {
+				throw new VerificationException(
+                        "Expected status " + expectedStatus + " for " + url + " but was " + statusCode);
+			}
+
+            return getEntityAsStringAndCloseStream(response);
+        } catch (Exception e) {
+            return throwUnchecked(e, String.class);
+        }
     }
 
+    private String getJsonAssertOkAndReturnBody(String url, int expectedStatus) {
+        HttpGet get = new HttpGet(url);
+        try {
+            HttpResponse response = httpClient.execute(get);
+            int statusCode = response.getStatusLine().getStatusCode();
+            if (statusCode != expectedStatus) {
+                throw new VerificationException(
+                        "Expected status " + expectedStatus + " for " + url + " but was " + statusCode);
+            }
+
+            return getEntityAsStringAndCloseStream(response);
+        } catch (Exception e) {
+            return throwUnchecked(e, String.class);
+        }
+    }
+
+    private String urlFor(Class<? extends AdminTask> taskClass) {
+        RequestSpec requestSpec = AdminTasks.requestSpecForTask(taskClass);
+        return String.format(ADMIN_URL_PREFIX + requestSpec.path(), host, port, urlPathPrefix);
+    }
 }

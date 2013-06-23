@@ -15,12 +15,11 @@
  */
 package com.github.tomakehurst.wiremock;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.testsupport.WireMockTestClient;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.testsupport.WireMockTestClient;
 
 public class AcceptanceTestBase {
 
@@ -42,7 +41,7 @@ public class AcceptanceTestBase {
 
 	@Before
 	public void init() throws InterruptedException {
-		WireMock.reloadAllMappings();
+		WireMock.resetToDefault();
         WireMock.clearAllRequests();
 	}
 	

@@ -15,13 +15,21 @@
  */
 package com.github.tomakehurst.wiremock.http;
 
+import com.github.tomakehurst.wiremock.admin.AdminTask;
+import com.github.tomakehurst.wiremock.admin.AdminTasks;
+import com.github.tomakehurst.wiremock.admin.RequestSpec;
 import com.github.tomakehurst.wiremock.common.Json;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
+import com.github.tomakehurst.wiremock.http.AbstractRequestHandler;
+import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.http.ResponseRenderer;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
+import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
 import com.github.tomakehurst.wiremock.verification.VerificationResult;
 
 import java.lang.annotation.ElementType;
@@ -68,6 +76,17 @@ public class AdminRequestHandler extends AbstractRequestHandler {
                 adminOperations.put(a.value(), m);
             }
         }
+    }
+
+    @Override
+    public ResponseDefinition handleRequest(Request request) {
+        notifier().info("Received request to " + request.getUrl() + " with body " + request.getBodyAsString());
+        AdminTask adminTask = AdminTasks.taskFor(request.getMethod(), withoutAdminRoot(request.getUrl()));
+        return adminTask.execute(admin, request);
+    }
+
+    private static String withoutAdminRoot(String url) {
+        return url.replace(ADMIN_CONTEXT_ROOT, "");
     }
 
     @Override
