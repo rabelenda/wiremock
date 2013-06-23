@@ -53,7 +53,7 @@ public class BoundedInMemoryRequestJournal implements ImmutableCapacityJournal {
     private Predicate<Request> matchedBy(final RequestPattern requestPattern) {
         return new Predicate<Request>() {
             public boolean apply(Request input) {
-                return requestPattern.isMatchedBy(input);
+                return requestPattern.isMatchedBy(input).isMatched();
             }
         };
     }

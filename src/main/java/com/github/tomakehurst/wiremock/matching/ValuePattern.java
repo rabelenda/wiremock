@@ -15,13 +15,11 @@
  */
 package com.github.tomakehurst.wiremock.matching;
 
-import static java.util.regex.Pattern.DOTALL;
-
-import java.util.regex.Pattern;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
-import com.google.common.base.Predicate;
+import com.github.tomakehurst.wiremock.matching.matchers.string.PatternMatcher;
+import com.google.common.base.Objects;
 
 @JsonSerialize(include=Inclusion.NON_NULL)
 public class ValuePattern {
@@ -31,8 +29,53 @@ public class ValuePattern {
 	private String matches;
 	private String doesNotMatch;
     private Boolean absent;
-	
-	public static ValuePattern equalTo(String value) {
+
+    @JsonIgnore
+    private PatternMatcher matcher;
+
+    private void initMatcher() {
+        checkNoMoreThanOneMatchTypeSpecified();
+        if (absent != null) {
+            if (absent) {
+                matcher = PatternMatcher.none();
+            } else {
+                matcher = PatternMatcher.any();
+            }
+        } else if (equalTo != null) {
+            matcher = PatternMatcher.equalsTo(equalTo);
+        } else if (contains != null) {
+            matcher = PatternMatcher.contains(contains);
+        } else if (matches != null) {
+            matcher = PatternMatcher.regex(matches);
+        } else if (doesNotMatch != null) {
+            matcher = PatternMatcher.regex(doesNotMatch).not();
+        } else {
+            matcher = PatternMatcher.any();
+        }
+    }
+
+    private void checkNoMoreThanOneMatchTypeSpecified() {
+        if (countAllAttributes() > 1) {
+            throw new IllegalStateException("Only one type of match may be specified");
+        }
+    }
+
+    private int countAllAttributes() {
+        return count(equalTo, contains, matches, doesNotMatch, absent);
+    }
+
+    private int count(Object... objects) {
+        int counter = 0;
+        for (Object obj: objects) {
+            if (obj != null) {
+                counter++;
+            }
+        }
+
+        return counter;
+    }
+
+    public static ValuePattern equalTo(String value) {
 		ValuePattern valuePattern = new ValuePattern();
 		valuePattern.setEqualTo(value);
 		return valuePattern;
@@ -52,143 +95,74 @@ public class ValuePattern {
 
     public static ValuePattern absent() {
         ValuePattern valuePattern = new ValuePattern();
-        valuePattern.absent = true;
+        valuePattern.setAbsent(true);
         return valuePattern;
     }
 	
-	public boolean isMatchFor(String value) {
+	public PatternMatch isMatchFor(String value) {
 		checkOneMatchTypeSpecified();
-
-        if (absent != null) {
-            return (absent && value == null);
-        } else if (equalTo != null) {
-			return value.equals(equalTo);
-		} else if (contains != null) {
-			return value.contains(contains);
-		} else if (matches != null) {
-			return isMatch(matches, value);
-		} else if (doesNotMatch != null) {
-			return !isMatch(doesNotMatch, value);
-		}
-		
-		return false;
+        return matcher.matches(value);
 	}
 	
-	public static Predicate<ValuePattern> matching(final String value) {
-		return new Predicate<ValuePattern>() {
-			public boolean apply(ValuePattern input) {
-				return input.isMatchFor(value);
-			}
-		};
-	}
-	
-	private boolean isMatch(String regex, String value) {
-		Pattern pattern = Pattern.compile(regex, DOTALL);
-		return pattern.matcher(value).matches();
-	}
-	
-	private void checkNoMoreThanOneMatchTypeSpecified() {
-		if (countAllAttributes() > 1) {
-			throw new IllegalStateException("Only one type of match may be specified");
-		}
-	}
-
 	private void checkOneMatchTypeSpecified() {
 		if (countAllAttributes() == 0) {
 			throw new IllegalStateException("One match type must be specified");
 		}
 	}
 	
-	private int countAllAttributes() {
-		return count(equalTo, contains, matches, doesNotMatch, absent);
-	}
-	
-	private int count(Object... objects) {
-		int counter = 0;
-		for (Object obj: objects) {
-			if (obj != null) {
-				counter++;
-			}
-		}
-		
-		return counter;
-	}
-	
 	public void setEqualTo(String equalTo) {
 		this.equalTo = equalTo;
-		checkNoMoreThanOneMatchTypeSpecified();
+        initMatcher();
 	}
 	
 	public void setContains(String contains) {
 		this.contains = contains;
-		checkNoMoreThanOneMatchTypeSpecified();
+        initMatcher();
 	}
 	
 	public void setMatches(String matches) {
 		this.matches = matches;
-		checkNoMoreThanOneMatchTypeSpecified();
+        initMatcher();
 	}
 
 	public void setDoesNotMatch(String doesNotMatch) {
 		this.doesNotMatch = doesNotMatch;
-		checkNoMoreThanOneMatchTypeSpecified();
+        initMatcher();
 	}
 
     public void setAbsent(Boolean absent) {
         this.absent = absent;
-        checkNoMoreThanOneMatchTypeSpecified();
+        initMatcher();
     }
 
-	public String getEqualTo() {
-		return equalTo;
-	}
-	
-	public String getContains() {
-		return contains;
-	}
-
-	public String getMatches() {
-		return matches;
-	}
-
-	public String getDoesNotMatch() {
-		return doesNotMatch;
-	}
-
-    public Boolean isAbsent() {
+	public Boolean isAbsent() {
         return absent;
     }
 
-    public boolean nullSafeIsAbsent() {
-        return (absent != null && absent);
+    public String getEqualTo() {
+        return equalTo;
     }
-	
-	@Override
+
+    public String getContains() {
+        return contains;
+    }
+
+    public String getMatches() {
+        return matches;
+    }
+
+    public String getDoesNotMatch() {
+        return doesNotMatch;
+    }
+
+    @Override
 	public String toString() {
-		if (equalTo != null) {
-			return "equal " + equalTo;
-		} else if (contains != null) {
-			return "contains " + contains;
-		} else if (matches != null) {
-			return "matches " + matches;
-		} else if (doesNotMatch != null) {
-			return "not match " + doesNotMatch; 
-		} else {
-            return "is absent";
-        }
+        return matcher.toString();
 	}
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((contains == null) ? 0 : contains.hashCode());
-		result = prime * result
-				+ ((doesNotMatch == null) ? 0 : doesNotMatch.hashCode());
-		result = prime * result + ((equalTo == null) ? 0 : equalTo.hashCode());
-		result = prime * result + ((matches == null) ? 0 : matches.hashCode());
-		return result;
+        return Objects.hashCode(contains, doesNotMatch, equalTo, matches);
 	}
 
 	@Override
@@ -203,34 +177,13 @@ public class ValuePattern {
 			return false;
 		}
 		ValuePattern other = (ValuePattern) obj;
-		if (contains == null) {
-			if (other.contains != null) {
-				return false;
-			}
-		} else if (!contains.equals(other.contains)) {
-			return false;
-		}
-		if (doesNotMatch == null) {
-			if (other.doesNotMatch != null) {
-				return false;
-			}
-		} else if (!doesNotMatch.equals(other.doesNotMatch)) {
-			return false;
-		}
-		if (equalTo == null) {
-			if (other.equalTo != null) {
-				return false;
-			}
-		} else if (!equalTo.equals(other.equalTo)) {
-			return false;
-		}
-		if (matches == null) {
-			if (other.matches != null) {
-				return false;
-			}
-		} else if (!matches.equals(other.matches)) {
-			return false;
-		}
-		return true;
+        return Objects.equal(contains, other.contains)
+                && Objects.equal(doesNotMatch, other.doesNotMatch)
+                && Objects.equal(equalTo, other.equalTo)
+                && Objects.equal(matches, other.matches);
 	}
+
+    public PatternMatcher getMatcher() {
+        return matcher;
+    }
 }

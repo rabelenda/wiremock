@@ -15,17 +15,12 @@
  */
 package com.github.tomakehurst.wiremock.testsupport;
 
-import com.github.tomakehurst.wiremock.http.ContentTypeHeader;
-import com.github.tomakehurst.wiremock.http.HttpHeader;
-import com.github.tomakehurst.wiremock.http.HttpHeaders;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
-import com.github.tomakehurst.wiremock.http.Request;
+import com.github.tomakehurst.wiremock.http.*;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 
 import java.util.List;
 
-import static com.github.tomakehurst.wiremock.http.HttpHeader.httpHeader;
 import static com.github.tomakehurst.wiremock.http.RequestMethod.GET;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
@@ -36,7 +31,7 @@ public class MockRequestBuilder {
 	private String url = "/";
 	private RequestMethod method = GET;
     private List<HttpHeader> individualHeaders = newArrayList();
-	private String body = "";
+    private String body = "";
 	private boolean browserProxyRequest = false;
 	
 	private String mockName;
@@ -72,8 +67,8 @@ public class MockRequestBuilder {
         individualHeaders.add(new HttpHeader(key, value));
 		return this;
 	}
-	
-	public MockRequestBuilder withBody(String body) {
+
+    public MockRequestBuilder withBody(String body) {
 		this.body = body;
 		return this;
 	}
@@ -101,7 +96,8 @@ public class MockRequestBuilder {
                     allowing(request).contentTypeHeader(); will(returnValue(new ContentTypeHeader(header.firstValue())));
                 }
             }
-            allowing(request).header(with(any(String.class))); will(returnValue(httpHeader("key", "value")));
+
+            allowing(request).header(with(any(String.class))); will(returnValue(HttpHeader.absent("key")));
 
             allowing(request).getHeaders(); will(returnValue(headers));
 			allowing(request).getAllHeaderKeys(); will(returnValue(newLinkedHashSet(headers.keys())));
