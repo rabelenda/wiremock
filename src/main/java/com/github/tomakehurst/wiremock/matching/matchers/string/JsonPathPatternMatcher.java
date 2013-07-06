@@ -2,13 +2,16 @@ package com.github.tomakehurst.wiremock.matching.matchers.string;
 
 import com.github.tomakehurst.wiremock.matching.MatchedGroups;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
+import com.google.common.collect.Lists;
 import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 
+import java.util.List;
+
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
 
-public class JsonPathPatternMatcher extends PatternMatcher {
+class JsonPathPatternMatcher extends PatternMatcher {
 
     private final String jsonPath;
 
@@ -23,7 +26,13 @@ public class JsonPathPatternMatcher extends PatternMatcher {
             if (obj instanceof JSONArray) {
                 JSONArray jsonArr = (JSONArray) obj;
                 if (jsonArr.size() > 0) {
-                    return PatternMatch.matched(new MatchedGroups(jsonArr.toString()));
+                    List<String> jsonStrs = Lists.newArrayList();
+                    for (Object o: jsonArr) {
+                        jsonStrs.add(o.toString());
+                    }
+                    return PatternMatch.matched(new MatchedGroups(jsonStrs.toArray(new String[]{})));
+                } else {
+                    return PatternMatch.notMatched();
                 }
             }
 
@@ -31,12 +40,17 @@ public class JsonPathPatternMatcher extends PatternMatcher {
                 JSONObject jsonObj = (JSONObject) obj;
                 if (jsonObj.size() > 0) {
                     return PatternMatch.matched(new MatchedGroups(jsonObj.toString()));
+                } else {
+                    return PatternMatch.notMatched();
                 }
             }
 
             if (obj != null) {
                 return PatternMatch.matched(new MatchedGroups(obj.toString()));
+            } else {
+                return PatternMatch.notMatched();
             }
+
         } catch (Exception e) {
             String error;
             if (e.getMessage().equalsIgnoreCase("invalid path")) {
@@ -52,8 +66,8 @@ public class JsonPathPatternMatcher extends PatternMatcher {
                     "Warning: JSON path expression '%s' failed to match document '%s' because %s",
                     jsonPath, value, error);
             notifier().info(message);
+            return PatternMatch.notMatched();
         }
-        return PatternMatch.notMatched();
     }
 
     @Override

@@ -1,7 +1,6 @@
 package com.github.tomakehurst.wiremock.verification.journal;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.base.Objects;
@@ -54,7 +53,7 @@ public class MutableCapacityJournal implements RequestJournal {
     }
 
     @Override
-    public synchronized void requestReceived(Request request, Response response) {
-        impl.requestReceived(request, response);
+    public synchronized void requestReceived(Request request) {
+        impl.requestReceived(request);
     }
 }

@@ -104,12 +104,12 @@ public class WireMock {
         defaultInstance.resetToDefaultMappings();
     }
 
-    public void clearRequests() {
-        admin.clearRequests();
+    public void resetRequestsJournal() {
+        admin.resetRequestsJournal();
     }
 
-    public static void clearAllRequests() {
-        defaultInstance.clearRequests();
+    public static void resetRequests() {
+        defaultInstance.resetRequestsJournal();
     }
 
 	public void register(MappingBuilder mappingBuilder) {
@@ -282,4 +282,5 @@ public class WireMock {
     public static void addRequestProcessingDelay(int milliseconds) {
         defaultInstance.addDelayBeforeProcessingRequests(milliseconds);
     }
+
 }

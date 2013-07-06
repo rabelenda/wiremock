@@ -103,8 +103,8 @@ public class WireMockApp implements StubServer, Admin {
     @Override
     public void resetMappings() {
         stubMappings.reset();
-        requestJournal.reset();
         requestDelayControl.clearDelay();
+        resetRequestsJournal();
     }
 
     @Override
@@ -138,7 +138,7 @@ public class WireMockApp implements StubServer, Admin {
     }
 
     @Override
-    public void clearRequests() {
+    public void resetRequestsJournal() {
         requestJournal.reset();
     }
 

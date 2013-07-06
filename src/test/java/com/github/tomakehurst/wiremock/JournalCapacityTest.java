@@ -20,15 +20,16 @@ import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.testsupport.WireMockTestClient;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
 import org.junit.After;
 import org.junit.Test;
 
 import java.util.Collections;
 import java.util.List;
 
+import static com.github.tomakehurst.wiremock.RequestQueryAcceptanceTest.withUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.testsupport.WireMatchers.hasExactly;
-import static com.github.tomakehurst.wiremock.testsupport.WireMatchers.withUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
@@ -69,7 +70,7 @@ public class JournalCapacityTest {
         return findAll(getRequestedFor(urlMatching("/.*")));
     }
 
-    @Test(expected = VerificationException.class)
+    @Test(expected = RequestJournalDisabledException.class)
     public void shouldFailWhenRequestQueryWithDisabledJournal() {
         setupJournalWithCapacity(0);
         generateRequests();
@@ -151,7 +152,7 @@ public class JournalCapacityTest {
         assertThat(getAllRequests(), hasExactly(withUrl("/use/3"), withUrl("/use/4"), withUrl("/use/5")));
     }
 
-    @Test(expected = VerificationException.class)
+    @Test(expected = RequestJournalDisabledException.class)
     public void shouldFailWhenQueryJournalWithDisabledJournalFromUnboundedJournal() {
         setupJournalWithCapacity(null);
         generateRequests(); //This code is just left to make it clear that the notifications will not change the behavior
@@ -178,7 +179,7 @@ public class JournalCapacityTest {
         assertThat(getAllRequests(), hasExactly(withUrl("/use/3"), withUrl("/use/4"), withUrl("/use/5")));
     }
 
-    @Test(expected = VerificationException.class)
+    @Test(expected = RequestJournalDisabledException.class)
     public void shouldFailWhenQueryJournalWithDisabledJournalFromBoundedJournal() {
         setupJournalWithCapacity(3);
         generateRequests(); //This code is just left to make it clear that the notifications will not change the behavior

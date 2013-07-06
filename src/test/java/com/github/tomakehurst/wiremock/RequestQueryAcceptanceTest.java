@@ -97,7 +97,7 @@ public class RequestQueryAcceptanceTest extends AcceptanceTestBase {
         assertThat(requests, hasExactly(withUrl("/use/1"), withUrl("/use/2"), withUrl("/use/3"), withUrl("/use/4")));
     }
 
-    private Matcher<LoggedRequest> withUrl(final String url) {
+    public static Matcher<LoggedRequest> withUrl(final String url) {
         return new TypeSafeMatcher<LoggedRequest>() {
             @Override
             public boolean matchesSafely(LoggedRequest loggedRequest) {

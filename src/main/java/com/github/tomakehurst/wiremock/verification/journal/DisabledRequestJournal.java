@@ -17,9 +17,9 @@
 package com.github.tomakehurst.wiremock.verification.journal;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
 
 import java.util.Collections;
 import java.util.List;

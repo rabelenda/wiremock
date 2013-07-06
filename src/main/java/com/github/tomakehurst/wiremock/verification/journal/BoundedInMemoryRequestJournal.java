@@ -17,7 +17,6 @@
 package com.github.tomakehurst.wiremock.verification.journal;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.base.Predicate;
@@ -59,7 +58,7 @@ public class BoundedInMemoryRequestJournal implements ImmutableCapacityJournal {
     }
 
     @Override
-    public void requestReceived(Request request, Response response) {
+    public void requestReceived(Request request) {
         requests.add(LoggedRequest.createFrom(request));
     }
 

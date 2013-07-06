@@ -29,7 +29,7 @@ public class ValuePattern {
 	private String matches;
 	private String doesNotMatch;
     private Boolean absent;
-    private String matchesJsonPath;
+    private String matchesJsonPaths;
 
     @JsonIgnore
     private PatternMatcher matcher;
@@ -50,8 +50,8 @@ public class ValuePattern {
             matcher = PatternMatcher.regex(matches);
         } else if (doesNotMatch != null) {
             matcher = PatternMatcher.regex(doesNotMatch).not();
-        } else if (matchesJsonPath != null) {
-            matcher = PatternMatcher.jsonPath(matchesJsonPath);
+        } else if (matchesJsonPaths != null) {
+            matcher = PatternMatcher.jsonPath(matchesJsonPaths);
         } else {
             matcher = PatternMatcher.any();
         }
@@ -64,7 +64,7 @@ public class ValuePattern {
     }
 
     private int countAllAttributes() {
-        return count(equalTo, contains, matches, doesNotMatch, absent);
+        return count(equalTo, contains, matches, doesNotMatch, absent, matchesJsonPaths);
     }
 
     private int count(Object... objects) {
@@ -138,8 +138,8 @@ public class ValuePattern {
         initMatcher();
     }
 
-    public void setMatchesJsonPaths(String matchesJsonPath) {
-        this.matchesJsonPath = matchesJsonPath;
+    public void setMatchesJsonPaths(String matchesJsonPaths) {
+        this.matchesJsonPaths = matchesJsonPaths;
         initMatcher();
     }
 
@@ -163,8 +163,8 @@ public class ValuePattern {
         return absent;
     }
 
-    public String getMatchesJsonPath() {
-        return matchesJsonPath;
+    public String getMatchesJsonPaths() {
+        return matchesJsonPaths;
     }
 
     @Override
@@ -174,7 +174,7 @@ public class ValuePattern {
 
 	@Override
 	public int hashCode() {
-        return Objects.hashCode(contains, doesNotMatch, equalTo, matches, matchesJsonPath);
+        return Objects.hashCode(contains, doesNotMatch, equalTo, matches, matchesJsonPaths);
 	}
 
 	@Override
@@ -193,7 +193,7 @@ public class ValuePattern {
                 && Objects.equal(doesNotMatch, other.doesNotMatch)
                 && Objects.equal(equalTo, other.equalTo)
                 && Objects.equal(matches, other.matches)
-                && Objects.equal(matchesJsonPath, other.matchesJsonPath);
+                && Objects.equal(matchesJsonPaths, other.matchesJsonPaths);
 	}
 
     public PatternMatcher getMatcher() {

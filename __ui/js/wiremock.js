@@ -72,7 +72,7 @@ function RequestListCtrl($scope, $http, $filter) {
   
   $scope.clear = function() {
     startRequest();
-    $http.post('/__admin/requests/clear').success(function(data) {
+    $http.post('/__admin/requests/reset').success(function(data) {
       $scope.requests = [];
       $scope.filteredRequests = [];
       endRequest();
@@ -83,7 +83,7 @@ function RequestListCtrl($scope, $http, $filter) {
 
   $scope.reload = function() {
       startRequest();
-      $http.post('/__admin/mappings/reload').success(function(data) {
+      $http.post('/__admin/mappings/reset').success(function(data) {
         endRequest();
       }). error(function(data, status) {
         failedRequest(data, status);

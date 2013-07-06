@@ -30,12 +30,10 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 
 import static com.github.tomakehurst.wiremock.common.Exceptions.throwUnchecked;
 import static com.github.tomakehurst.wiremock.common.HttpClientUtils.getEntityAsStringAndCloseStream;
-import static com.github.tomakehurst.wiremock.http.MimeType.JSON;
 import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_OK;
 import static org.apache.http.entity.ContentType.APPLICATION_JSON;
@@ -128,14 +126,19 @@ public class HttpAdminClient implements Admin {
     }
 
     @Override
-    public void clearRequests() {
-        int status = postEmptyBodyAndReturnStatus(getAdminUrl(LOCAL_WIREMOCK_CLEAR_REQUESTS_URL));
-        assertStatusOk(status);
+    public void resetRequestsJournal() {
+        postJsonAssertOkAndReturnBody(
+                urlFor(RequestsJournalResetTask.class),
+                null,
+                HTTP_OK);
     }
 
     @Override
     public GlobalSettings getGlobalSettings() {
-        String body = postJsonAssertOkAndReturnBody(getAdminUrl(WIREMOCK_GET_GLOBAL_SETTINGS_URL), null, HTTP_OK);
+        String body = postJsonAssertOkAndReturnBody(
+                urlFor(GlobalSettingsGetTask.class),
+                null,
+                HTTP_OK);
         return Json.read(body, GlobalSettings.class);
     }
 

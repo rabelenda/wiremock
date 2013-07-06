@@ -1,7 +1,7 @@
 #!/bin/bash
 # Script to control wiremock
 
-WIREMOCK_VERSION="1.32"
+WIREMOCK_VERSION="1.34"
 WIREMOCK_JAR="wiremock-$WIREMOCK_VERSION-standalone.jar"
 SCRIPT_NAME=`basename $0`
 PID_FILE="/var/run/$SCRIPT_NAME.pid"

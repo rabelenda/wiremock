@@ -73,17 +73,17 @@ public class WireMockJUnitRuleTest {
         
         @Test
         public void testStubAndFetchOnce() {
-            assertNoReviousRequestsReceived();
+            assertNoPreviousRequestsReceived();
             assertCanRegisterStubAndFetchOnCorrectPort();
         }
         
         @Test
         public void testStubAndFetchAgain() {
-            assertNoReviousRequestsReceived(); // Will fail if reset() not called after the previous test case
+            assertNoPreviousRequestsReceived(); // Will fail if reset() not called after the previous test case
             assertCanRegisterStubAndFetchOnCorrectPort();
         }
 
-        private void assertNoReviousRequestsReceived() {
+        private void assertNoPreviousRequestsReceived() {
             verify(0, getRequestedFor(urlMatching(".*")));
         }
     

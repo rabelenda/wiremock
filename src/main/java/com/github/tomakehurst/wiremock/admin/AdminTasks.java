@@ -34,10 +34,12 @@ public class AdminTasks {
                 .put(requestSpec(POST, "/mappings/new"), NewStubMappingTask.class)
                 .put(requestSpec(POST, "/scenarios/reset"), ResetScenariosTask.class)
                 .put(requestSpec(POST, "/mappings/reset"), ResetToDefaultMappingsTask.class)
+                .put(requestSpec(POST, "/requests/reset"), RequestsJournalResetTask.class)
                 .put(requestSpec(POST, "/requests/count"), GetRequestCountTask.class)
                 .put(requestSpec(POST, "/requests/find"), FindRequestsTask.class)
                 .put(requestSpec(POST, "/socket-delay"), SocketDelayTask.class)
-                .put(requestSpec(POST, "/settings"), GlobalSettingsUpdateTask.class)
+                .put(requestSpec(POST, "/settings/get"), GlobalSettingsGetTask.class)
+                .put(requestSpec(POST, "/settings/set"), GlobalSettingsUpdateTask.class)
                 .build();
 
     public static AdminTask taskFor(RequestMethod method, String path) {
