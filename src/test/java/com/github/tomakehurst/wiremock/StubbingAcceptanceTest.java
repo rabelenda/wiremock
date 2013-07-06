@@ -36,14 +36,6 @@ import static junit.framework.Assert.assertTrue;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
-import org.apache.http.MalformedChunkCodingException;
-import org.apache.http.NoHttpResponseException;
-import org.apache.http.client.ClientProtocolException;
-import org.junit.Test;
-
-import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.testsupport.WireMockResponse;
-
 public class StubbingAcceptanceTest extends AcceptanceTestBase {
 	
 	@Test

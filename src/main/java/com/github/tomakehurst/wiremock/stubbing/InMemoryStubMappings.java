@@ -42,7 +42,7 @@ public class InMemoryStubMappings implements StubMappings {
             this.groups = groups;
         }
     }
-	
+
 	@Override
 	public ResponseDefinition serveFor(Request request) {
         MatchingStubMapping match = findMatchingMapping(request);
