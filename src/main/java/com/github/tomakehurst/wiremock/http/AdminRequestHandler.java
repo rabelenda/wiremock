@@ -19,14 +19,6 @@ import com.github.tomakehurst.wiremock.admin.AdminTask;
 import com.github.tomakehurst.wiremock.admin.AdminTasks;
 import com.github.tomakehurst.wiremock.core.Admin;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
-
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
 import static com.github.tomakehurst.wiremock.core.WireMockApp.ADMIN_CONTEXT_ROOT;
 
@@ -34,31 +26,10 @@ public class AdminRequestHandler extends AbstractRequestHandler {
 
     private final Admin admin;
 
-    @Retention(RetentionPolicy.RUNTIME)
-    @Target(ElementType.METHOD)
-    private static @interface AdminOperation {
-
-        String value();
-
-    }
-
-    private Map<String, Method> adminOperations;
-
-	public AdminRequestHandler(Admin admin, ResponseRenderer responseRenderer) {
+    public AdminRequestHandler(Admin admin, ResponseRenderer responseRenderer) {
 		super(responseRenderer);
         this.admin = admin;
-        loadAdminOperations();
 	}
-
-    private void loadAdminOperations() {
-        adminOperations = new HashMap<String, Method>();
-        for (Method m : getClass().getDeclaredMethods()) {
-            AdminOperation a = m.getAnnotation(AdminOperation.class);
-            if (a != null) {
-                adminOperations.put(a.value(), m);
-            }
-        }
-    }
 
     @Override
     public ResponseDefinition handleRequest(Request request) {
