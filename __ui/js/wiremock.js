@@ -1,9 +1,22 @@
-angular.module('wiremock', []).
+angular.module('wiremock', ['ngRoute']).
   config(function($routeProvider) {
     $routeProvider.
       when('/requests', {controller:RequestListCtrl, templateUrl:'requestList.html'}).
       otherwise({redirectTo:'/requests'});
-  });
+  }).
+  directive('ngEnter', function() {
+        return function(scope, element, attrs) {
+            element.bind("keydown keypress", function(event) {
+                if(event.which === 13) {
+                    scope.$apply(function(){
+                        scope.$eval(attrs.ngEnter);
+                    });
+
+                    event.preventDefault();
+                }
+            });
+        };
+    });;
  
  
 function RequestListCtrl($scope, $http, $filter) {
@@ -14,7 +27,7 @@ function RequestListCtrl($scope, $http, $filter) {
     $scope.filteredRequests = $filter("filter")($scope.requests, query);
   }
 
-  //$scope.$watch("search", search);
+  // uncomment to search on every key hit $scope.$watch("search", search);
 
   function startRequest() {
     $scope.loading++;
