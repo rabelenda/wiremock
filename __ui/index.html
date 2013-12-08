@@ -9,15 +9,22 @@
     <meta name="author" content="">
     <title>WireMock</title>
 
-    <script src="lib/angular/angular.min.js"></script>
-    <script src="lib/angular/angular-route.min.js"></script>
-    <script src="js/wiremock.js"></script>
-    <script src="js/favicon.js"></script>
+    <script src="scripts/vendor/angular/angular.min.js"></script>
+    <script src="scripts/vendor/angular/angular-route.min.js"></script>
+    <script src="scripts/vendor/angular-strap-navbar.js"></script>
+    <script src="scripts/vendor/jquery-1.10.2.min.js"></script>
+    
+    <script src="scripts/directives/wm-enter.js"></script>
+
+    <script src="scripts/controllers/wm-requests.js"></script>
+    
+    <script src="scripts/wiremock.js"></script>
     
     <!-- required to avoid logging the favicon request in wiremock -->
+    <script src="scripts/util/favicon.js"></script>
     <link rel="shortcut icon" href="#">
 
-    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/bootstrap.min.css">
     
 
     <!-- Just for debugging purposes. Don't actually copy this line! -->
@@ -60,18 +67,33 @@
     </style>
   </head>
   <body class="container">
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" bs-navbar>
       <div class="container">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
             <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="#">WireMock</a>
         </div>
         <div class="collapse navbar-collapse">
           <ul class="nav navbar-nav">
-            <li class="active"><a href="#/requests">Requests</a></li>
+            <li data-match-route="/requests">
+              <a href="#/requests"><span class="glyphicon glyphicon-inbox"></span> Requests</a>
+            </li>
+            <li data-match-route="/mappings">
+              <a href="#/mappings"><span class="glyphicon glyphicon-edit"></span> Mappings</a>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li data-match-route="/settings">
+              <a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+            </li>
+            <li data-match-route="/docs">
+              <a href="#/docs"><span class="glyphicon glyphicon-book"></span> Docs</a>
+            </li>
           </ul>
         </div><!--/.nav-collapse -->
       </div>

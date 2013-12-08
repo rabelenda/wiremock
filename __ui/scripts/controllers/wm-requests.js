@@ -1,25 +1,4 @@
-angular.module('wiremock', ['ngRoute']).
-  config(function($routeProvider) {
-    $routeProvider.
-      when('/requests', {controller:RequestListCtrl, templateUrl:'requestList.html'}).
-      otherwise({redirectTo:'/requests'});
-  }).
-  directive('ngEnter', function() {
-        return function(scope, element, attrs) {
-            element.bind("keydown keypress", function(event) {
-                if(event.which === 13) {
-                    scope.$apply(function(){
-                        scope.$eval(attrs.ngEnter);
-                    });
-
-                    event.preventDefault();
-                }
-            });
-        };
-    });;
- 
- 
-function RequestListCtrl($scope, $http, $filter) {
+angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter, $location) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   
@@ -27,7 +6,8 @@ function RequestListCtrl($scope, $http, $filter) {
     $scope.filteredRequests = $filter("filter")($scope.requests, query);
   }
 
-  // uncomment to search on every key hit $scope.$watch("search", search);
+  // uncomment to search on every key hit 
+  // $scope.$watch("search", search);
 
   function startRequest() {
     $scope.loading++;
@@ -102,4 +82,4 @@ function RequestListCtrl($scope, $http, $filter) {
         failedRequest(data, status);
       });
     };
-}
+});
