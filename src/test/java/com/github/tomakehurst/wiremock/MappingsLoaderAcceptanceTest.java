@@ -20,9 +20,14 @@ import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsLoader;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
 import com.github.tomakehurst.wiremock.testsupport.WireMockResponse;
 import com.github.tomakehurst.wiremock.testsupport.WireMockTestClient;
+import org.jmock.Expectations;
+import org.jmock.Mockery;
+import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -32,11 +37,26 @@ public class MappingsLoaderAcceptanceTest {
 	private WireMockServer wireMockServer;
 	private WireMockTestClient testClient;
 
+    private File unorderedSourceFolder;
+
 	@Before
 	public void init() {
-		constructWireMock();
+        wireMockServer = new WireMockServer();
 		wireMockServer.start();
 		testClient = new WireMockTestClient();
+
+        Mockery context = new Mockery();
+        context.setImposteriser(ClassImposteriser.INSTANCE);
+
+        final File[] unorderedFiles = {new File("src/test/resources/test-requests/401-example.json"),
+                new File("src/test/resources/test-requests/default.json"),
+                new File("src/test/resources/test-requests/200-example.json")};
+        unorderedSourceFolder = context.mock(File.class);
+        context.checking(new Expectations() {{
+            allowing(unorderedSourceFolder).exists(); will(returnValue(true));
+            allowing(unorderedSourceFolder).isDirectory(); will(returnValue(true));
+            allowing(unorderedSourceFolder).listFiles(); will(onConsecutiveCalls(returnValue(unorderedFiles), returnValue(new File[0])));
+        }});
 	}
 
 	@After
@@ -44,18 +64,16 @@ public class MappingsLoaderAcceptanceTest {
 		wireMockServer.stop();
 	}
 	
-	private void constructWireMock() {
-		wireMockServer = new WireMockServer();
-		MappingsLoader mappingsLoader = new JsonFileMappingsLoader(new SingleRootFileSource("src/test/resources/test-requests"));
-		wireMockServer.loadMappingsUsing(mappingsLoader);
-	}
-	
 	@Test
 	public void mappingsLoadedFromJsonFiles() {
-		WireMockResponse response = testClient.get("/canned/resource/1");
+        MappingsLoader mappingsLoader = new JsonFileMappingsLoader(new SingleRootFileSource(unorderedSourceFolder));
+        wireMockServer.loadMappingsUsing(mappingsLoader);
+
+        WireMockResponse response = testClient.get("/canned/resource/1");
 		assertThat(response.statusCode(), is(200));
 		
 		response = testClient.get("/canned/resource/2");
 		assertThat(response.statusCode(), is(401));
 	}
+
 }

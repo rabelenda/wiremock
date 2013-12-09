@@ -1,0 +1,8 @@
+{
+	"request": {
+		"method": "ANY"
+	},
+	"response": {
+		"status": 400
+	}
+}

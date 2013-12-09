@@ -21,6 +21,8 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -70,6 +72,15 @@ public abstract class AbstractFileSource implements FileSource {
     	return toTextFileList(fileList);
     }
 
+
+    @Override
+    public List<TextFile> orderedListFiles() {
+        assertExistsAndIsDirectory();
+        List<File> fileList = asList(rootDirectory.listFiles(filesOnly()));
+        Collections.sort(fileList);
+        return toTextFileList(fileList);
+    }
+
     @Override
     public List<TextFile> listFilesRecursively() {
     	assertExistsAndIsDirectory();
@@ -87,6 +98,26 @@ public abstract class AbstractFileSource implements FileSource {
     			fileList.add(file);
     		}
     	}
+    }
+
+    @Override
+    public List<TextFile> orderedListFilesRecursively() {
+        assertExistsAndIsDirectory();
+        List<File> fileList = newArrayList();
+        recursivelyAddOrderedFilesToList(rootDirectory, fileList);
+        return toTextFileList(fileList);
+    }
+
+    private void recursivelyAddOrderedFilesToList(File root, List<File> fileList) {
+        File[] files = root.listFiles();
+        Arrays.sort(files);
+        for (File file: files) {
+            if (file.isDirectory()) {
+                recursivelyAddOrderedFilesToList(file, fileList);
+            } else {
+                fileList.add(file);
+            }
+        }
     }
 
     private List<TextFile> toTextFileList(List<File> fileList) {

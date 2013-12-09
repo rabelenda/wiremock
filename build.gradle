@@ -44,6 +44,11 @@ dependencies {
         exclude group: "org.hamcrest", module: "hamcrest-core"
         exclude group: "org.hamcrest", module: "hamcrest-library"
 	}
+    testCompile ("org.jmock:jmock-legacy:2.5.1") {
+        exclude group: "junit", module: "junit-dep"
+        exclude group: "org.hamcrest", module: "hamcrest-core"
+        exclude group: "org.hamcrest", module: "hamcrest-library"
+    }
 	testCompile "net.sf.json-lib:json-lib:2.4:jdk15"
 	testCompile "com.googlecode.jarjar:jarjar:1.3"
 
