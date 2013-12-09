@@ -46,9 +46,9 @@ public class SingleRootFileSourceTest {
 		List<TextFile> files = fileSource.listFilesRecursively();
 		
 		assertThat(files, hasExactlyIgnoringOrder(
-				fileNamed("one"), fileNamed("two"), fileNamed("three"), 
-				fileNamed("four"), fileNamed("five"), fileNamed("six"), 
-				fileNamed("seven"), fileNamed("eight")));
+                fileNamed("one"), fileNamed("two"), fileNamed("three"),
+                fileNamed("four"), fileNamed("five"), fileNamed("six"),
+                fileNamed("seven"), fileNamed("eight")));
 	}
 	
 	@Test(expected=RuntimeException.class)
@@ -80,7 +80,11 @@ public class SingleRootFileSourceTest {
 			public boolean matchesSafely(TextFile textFile) {
 				return textFile.name().equals(name);
 			}
-			
-		};
+
+            @Override
+            public String toString() {
+                return name;
+            }
+        };
 	}
 }
