@@ -1,12 +1,4 @@
-angular.module('wiremock', []).
-  config(function($routeProvider) {
-    $routeProvider.
-      when('/requests', {controller:RequestListCtrl, templateUrl:'requestList.html'}).
-      otherwise({redirectTo:'/requests'});
-  });
- 
- 
-function RequestListCtrl($scope, $http, $filter) {
+angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter, $location) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   
@@ -14,7 +6,8 @@ function RequestListCtrl($scope, $http, $filter) {
     $scope.filteredRequests = $filter("filter")($scope.requests, query);
   }
 
-  //$scope.$watch("search", search);
+  // uncomment to search on every key hit 
+  // $scope.$watch("search", search);
 
   function startRequest() {
     $scope.loading++;
@@ -89,4 +82,4 @@ function RequestListCtrl($scope, $http, $filter) {
         failedRequest(data, status);
       });
     };
-}
+});

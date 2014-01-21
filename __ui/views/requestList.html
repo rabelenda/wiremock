@@ -1,0 +1,47 @@
+<div class="row" ng-show="connectionError">
+  <div class="alert alert-error">
+    <strong>Error!</strong> Problem contacting wiremock, check if it is running.
+  </div>
+</div>
+<div class="row">
+  <div class="input-group">
+    <input type="text" ng-model="search" autofocus="true" class="form-control" placeholder="Search" wm-enter="refresh()"/>
+    <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span> {{filteredRequests.length}} of {{requests.length}} requests</span>
+  </div>
+  <div style="white-space: nowrap;">
+    <a class="btn btn-info" href="" ng-click="refresh()"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+    <a class="btn btn-danger" href="" ng-click="clear()"><span class="glyphicon glyphicon-trash"></span> Clear</a>
+    <a class="btn btn-warning" href="" ng-click="reload()"><span class="glyphicon glyphicon-upload"></span> Reload Mappings</a>
+    <span class="label label-warning" ng-show="loading > 0">Loading...</span>
+  </div>
+</div>
+<div class="row">
+<table class="table table-striped table-hover">
+  <thead>
+  <tr>
+    <th>URL</th>
+    <th>Date</th>
+    <th>
+      <span style="vertical-align: bottom;">Body</span>
+      <select ng-model="bodyDecoding" ng-change="decodeBodies()" style="height: auto; width: auto; margin-bottom: 0px">
+        <option value="raw">Raw</option>
+        <option value="latin">Latin</option>
+        <option value="utf8">UTF-8</option>
+      </select>
+    </th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr ng-repeat="request in filteredRequests">
+    <td class="col-md-3">{{request.url}}</a></td>
+    <td class="col-md-2">{{request.loggedDateString}}</td>
+    <td class="col-md-4">
+      <div class="alert alert-error" ng-show="request.failedDecoding">
+        <strong>Error!</strong> Problem decoding the body, you can try with other charset.
+      </div>
+      <span>{{request.decodedBody}}</span>
+    </td>
+  </tr>
+  </tbody>
+</table>
+</div>

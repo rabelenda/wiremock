@@ -52,6 +52,14 @@ public class ContentTypeHeaderTest {
 		ContentTypeHeader header = new ContentTypeHeader("text/plain");
 		assertThat(header.mimeTypePart(), is("text/plain"));
 	}
+
+    @Test
+    public void returnsCharsetWhenNotFirstParameter() {
+        ContentTypeHeader header = new ContentTypeHeader("text/plain; param=value; charset=utf-8");
+        Optional<String> encoding = header.encodingPart();
+        assertTrue(encoding.isPresent());
+        assertThat(encoding.get(), is("utf-8"));
+    }
 	
 	@Test
 	public void returnsAbsentOptionalEncodingPartWhenNotPresent() {

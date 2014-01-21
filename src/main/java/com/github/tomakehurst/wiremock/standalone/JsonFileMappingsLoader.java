@@ -21,6 +21,9 @@ import com.github.tomakehurst.wiremock.stubbing.JsonStubMappingCreator;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.google.common.base.Predicate;
 
+import java.util.Collections;
+import java.util.List;
+
 import static com.google.common.collect.Iterables.filter;
 
 public class JsonFileMappingsLoader implements MappingsLoader {
@@ -34,7 +37,11 @@ public class JsonFileMappingsLoader implements MappingsLoader {
 	@Override
 	public void loadMappingsInto(StubMappings stubMappings) {
 		JsonStubMappingCreator jsonStubMappingCreator = new JsonStubMappingCreator(stubMappings);
-		Iterable<TextFile> mappingFiles = filter(mappingsFileSource.listFilesRecursively(), byFileExtension("json"));
+        List<TextFile> fileMappings = mappingsFileSource.orderedListFilesRecursively();
+        //reversed because mappings are matched in reverse order to support overwrite semantics
+        //and with file mappings we want to preserve the original order
+        Collections.reverse(fileMappings);
+        Iterable<TextFile> mappingFiles = filter(fileMappings, byFileExtension("json"));
 		for (TextFile mappingFile: mappingFiles) {
 			jsonStubMappingCreator.addMappingFrom(mappingFile.readContents());
 		}
