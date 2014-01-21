@@ -32,16 +32,28 @@
   </tr>
   </thead>
   <tbody>
-  <tr ng-repeat="request in filteredRequests">
-    <td class="col-md-3">{{request.url}}</a></td>
-    <td class="col-md-2">{{request.loggedDateString}}</td>
+  <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true" ng-dblclick="open(request.url, request.decodedBody)">
+    <td class="col-md-3">{{request.url | substring:0:35}}</a></td>
+    <td class="col-md-2">{{request.loggedDateString  | date:'yyyy-MM-dd HH:mm:ss'}}</td>
     <td class="col-md-4">
       <div class="alert alert-error" ng-show="request.failedDecoding">
         <strong>Error!</strong> Problem decoding the body, you can try with other charset.
       </div>
-      <span>{{request.decodedBody}}</span>
+      <span>{{request.decodedBody | substring:0:85}}</span>
     </td>
   </tr>
   </tbody>
 </table>
 </div>
+
+<script type="text/ng-template" id="modal.html">
+	<div class="modal-header">
+		<div style="word-wrap: break-word;"><h4>{{ url }}</h4></div>
+	</div>
+	<div class="modal-body">
+		<div style="word-wrap: break-word;">{{ body }}</div><br>
+	</div>
+	<div class="modal-footer">
+		<button class="btn btn-primary" ng-click="ok()">OK</button>
+	</div>
+</script>

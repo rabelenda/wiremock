@@ -1,4 +1,4 @@
-angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter, $location) {
+angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestListCtrl', function ($scope, $http, $filter, $location, $modal) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   
@@ -82,4 +82,36 @@ angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function
         failedRequest(data, status);
       });
     };
+    
+  $scope.open = function ($url, $body) {
+      var modalInstance = $modal.open({
+        templateUrl: 'modal.html',
+        controller: ModalInstanceCtrl,
+        resolve: {
+          url: function () {
+            return $url;
+          },
+          body: function () {
+            return $body;
+          },
+        }
+     });
+  };
+})
+.filter('substring', function() {
+	return function(str, start, end) {
+		return str.substring(start, end);
+	};
 });
+
+
+var ModalInstanceCtrl = function ($scope, $modalInstance, url, body) {
+
+	$scope.url = url;
+	$scope.body = body;
+	
+	$scope.ok = function () {
+	 $modalInstance.close();
+	};
+
+};
