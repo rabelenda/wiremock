@@ -1,4 +1,4 @@
-angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter, $location) {
+angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   

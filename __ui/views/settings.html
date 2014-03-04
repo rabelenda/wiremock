@@ -1,0 +1,14 @@
+<div class="row" ng-show="connectionError">
+  <div class="alert alert-error">
+    <strong>Error!</strong> Problem contacting wiremock, check if it is running.
+  </div>
+</div>
+<div class="row">
+  <a class="btn btn-info" href="" ng-click="refresh()"><span class="glyphicon glyphicon-refresh"></span> Refresh</a>
+  <span class="label label-warning" ng-show="loading > 0">Loading...</span>
+</div>
+<div class="row">
+  <label>Fixed Delay</label><span> {{fixedDelay}}</span><br/>
+  <label>Jounal Capacity</label><span> {{journalCapacity}}</span>
+</table>
+</div>

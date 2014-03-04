@@ -17,6 +17,8 @@
     <script src="scripts/directives/wm-enter.js"></script>
 
     <script src="scripts/controllers/wm-requests.js"></script>
+    <script src="scripts/controllers/wm-mappings.js"></script>
+    <script src="scripts/controllers/wm-settings.js"></script>
     
     <script src="scripts/wiremock.js"></script>
     
@@ -86,13 +88,16 @@
             <li data-match-route="/mappings">
               <a href="#/mappings"><span class="glyphicon glyphicon-edit"></span> Mappings</a>
             </li>
+            <li data-match-route="/files">
+              <a href="#/files"><span class="glyphicon glyphicon-folder-open"></span> Files</a>
+            </li>
           </ul>
           <ul class="nav navbar-nav navbar-right">
             <li data-match-route="/settings">
               <a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a>
             </li>
-            <li data-match-route="/docs">
-              <a href="#/docs"><span class="glyphicon glyphicon-book"></span> Docs</a>
+            <li>
+              <a href="https://github.com/rabelenda/wiremock/tree/master/docs/source" target="_blank"><span class="glyphicon glyphicon-book"></span> Docs</a>
             </li>
           </ul>
         </div><!--/.nav-collapse -->
