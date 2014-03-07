@@ -18,14 +18,12 @@ package com.github.tomakehurst.wiremock.servlet;
 import com.github.tomakehurst.wiremock.Log4jConfiguration;
 import com.github.tomakehurst.wiremock.common.Log4jNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
-import com.github.tomakehurst.wiremock.core.MappingsSaver;
-import com.github.tomakehurst.wiremock.http.AdminRequestHandler;
 import com.github.tomakehurst.wiremock.common.ServletContextFileSource;
+import com.github.tomakehurst.wiremock.core.MappingsSaver;
 import com.github.tomakehurst.wiremock.core.WireMockApp;
 import com.github.tomakehurst.wiremock.global.NotImplementedRequestDelayControl;
 import com.github.tomakehurst.wiremock.http.*;
 import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsLoader;
-import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsSaver;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
@@ -36,11 +34,13 @@ public class WireMockWebContextListener implements ServletContextListener {
     private static final String FILES_ROOT = "__files";
     private static final String APP_CONTEXT_KEY = "WireMockApp";
     private static final String FILE_SOURCE_ROOT_KEY = "WireMockFileSourceRoot";
+    private static final String JOURNAL_CAPACITY_KEY = "WireMockJournalCapacity";
 
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContext context = sce.getServletContext();
         String fileSourceRoot = context.getInitParameter(FILE_SOURCE_ROOT_KEY);
+        Integer journalCapacity = getOptionalInt(context.getInitParameter(JOURNAL_CAPACITY_KEY));
         
         ServletContextFileSource fileSource = new ServletContextFileSource(context, fileSourceRoot);
         Log4jConfiguration.configureLogging(true);
@@ -52,7 +52,7 @@ public class WireMockWebContextListener implements ServletContextListener {
                 false,
                 defaultMappingsLoader,
                 mappingsSaver,
-                false,
+                journalCapacity,
                 new NotImplementedContainer());
         AdminRequestHandler adminRequestHandler = new AdminRequestHandler(wireMockApp, new BasicResponseRenderer());
         StubRequestHandler stubRequestHandler = new StubRequestHandler(wireMockApp,
@@ -63,6 +63,13 @@ public class WireMockWebContextListener implements ServletContextListener {
         context.setAttribute(StubRequestHandler.class.getName(), stubRequestHandler);
         context.setAttribute(AdminRequestHandler.class.getName(), adminRequestHandler);
         context.setAttribute(Notifier.KEY, new Log4jNotifier());
+    }
+
+    private Integer getOptionalInt(String str) {
+        if (str == null)
+            return null;
+        else
+            return Integer.valueOf(str);
     }
 
     @Override

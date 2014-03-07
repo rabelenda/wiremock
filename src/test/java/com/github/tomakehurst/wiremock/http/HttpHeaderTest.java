@@ -15,6 +15,7 @@
  */
 package com.github.tomakehurst.wiremock.http;
 
+import com.github.tomakehurst.wiremock.matching.PatternMatch;
 import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import org.junit.Test;
 
@@ -69,16 +70,16 @@ public class HttpHeaderTest {
     public void shouldMatchSingleValueToValuePattern() {
         HttpHeader header = new HttpHeader("My-Header", "my-value");
 
-        assertThat(header.hasValueMatching(ValuePattern.equalTo("my-value")), is(true));
-        assertThat(header.hasValueMatching(ValuePattern.equalTo("other-value")), is(false));
+        assertThat(header.hasValueMatching(ValuePattern.equalTo("my-value").getMatcher()), is(PatternMatch.matched()));
+        assertThat(header.hasValueMatching(ValuePattern.equalTo("other-value").getMatcher()), is(PatternMatch.notMatched()));
     }
 
     @Test
     public void shouldMatchMultiValueToValuePattern() {
         HttpHeader header = new HttpHeader("My-Header", "value1", "value2", "value3");
 
-        assertThat(header.hasValueMatching(ValuePattern.matches("value.*")), is(true));
-        assertThat(header.hasValueMatching(ValuePattern.equalTo("value2")), is(true));
-        assertThat(header.hasValueMatching(ValuePattern.equalTo("value4")), is(false));
+        assertThat(header.hasValueMatching(ValuePattern.matches("value.*").getMatcher()), is(PatternMatch.matched()));
+        assertThat(header.hasValueMatching(ValuePattern.equalTo("value2").getMatcher()), is(PatternMatch.matched()));
+        assertThat(header.hasValueMatching(ValuePattern.equalTo("value4").getMatcher()), is(PatternMatch.notMatched()));
     }
 }

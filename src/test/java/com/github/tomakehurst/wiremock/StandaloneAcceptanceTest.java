@@ -410,24 +410,6 @@ public class StandaloneAcceptanceTest {
         };
     }
 
-    private Matcher<Exception> causedByHttpHostConnectException() {
-        return new TypeSafeMatcher<Exception>() {
-            @Override
-            public boolean matchesSafely(Exception o) {
-                if (!(o instanceof RuntimeException)) {
-                    return false;
-                }
-                RuntimeException re = (RuntimeException)o;
-                return re.getCause() instanceof HttpHostConnectException;
-            }
-
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("Expected RuntimeException with nested HttpHostConnectException");
-            }
-        };
-    }
-
     /**
      * Decompress the binary gzipped content into a String.
      *

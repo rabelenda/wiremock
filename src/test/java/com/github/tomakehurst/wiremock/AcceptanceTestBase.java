@@ -34,11 +34,6 @@ public class AcceptanceTestBase {
 		setupServer(wireMockConfig());
 	}
 
-	@AfterClass
-	public static void serverShutdown() {
-		wireMockServer.stop();
-	}
-
     public static void setupServer(Options options) {
         wireMockServer = new WireMockServer(options);
         wireMockServer.start();
@@ -46,9 +41,15 @@ public class AcceptanceTestBase {
         WireMock.configure();
     }
 
-	@Before
+    @AfterClass
+	public static void serverShutdown() {
+		wireMockServer.stop();
+	}
+
+    @Before
 	public void init() throws InterruptedException {
 		WireMock.resetToDefault();
+        WireMock.resetRequests();
 	}
 
 }

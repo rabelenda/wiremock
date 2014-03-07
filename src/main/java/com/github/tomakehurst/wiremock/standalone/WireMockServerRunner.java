@@ -30,6 +30,7 @@ import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
 import static java.lang.System.out;
 
 public class WireMockServerRunner {
+
 	private WireMockServer wireMockServer;
 	
 	public void run(FileSource fileSource, String... args) {

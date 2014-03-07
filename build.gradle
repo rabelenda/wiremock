@@ -10,41 +10,47 @@ group = 'com.github.tomakehurst'
 version = 1.43
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 configurations {
-	provided
+    provided
 }
 
 dependencies {
-	compile "org.mortbay.jetty:jetty:6.1.26"
-	compile "com.google.guava:guava:13.0.1"
-	compile "com.fasterxml.jackson.core:jackson-core:2.1.2", 
-        	"com.fasterxml.jackson.core:jackson-annotations:2.1.2", 
-        	"com.fasterxml.jackson.core:jackson-databind:2.1.2"
-	compile "org.apache.httpcomponents:httpclient:4.2.3"
+    compile "org.mortbay.jetty:jetty:6.1.26"
+    compile "com.google.guava:guava:13.0.1"
+    compile "com.fasterxml.jackson.core:jackson-core:2.1.2", 
+            "com.fasterxml.jackson.core:jackson-annotations:2.1.2", 
+            "com.fasterxml.jackson.core:jackson-databind:2.1.2"
+    compile "org.apache.httpcomponents:httpclient:4.2.3"
     compile "org.skyscreamer:jsonassert:1.2.1"
     compile "com.jayway.jsonpath:json-path:0.8.1"
-	compile "log4j:log4j:1.2.16"
-	compile "net.sf.jopt-simple:jopt-simple:4.3"
-	compile ("junit:junit-dep:4.10") {
+    compile "log4j:log4j:1.2.16"
+    compile "net.sf.jopt-simple:jopt-simple:4.3"
+    compile ("junit:junit-dep:4.10") {
         exclude group: "org.hamcrest", module: "hamcrest-core"
     }
-	
+    compile "commons-collections:commons-collections:3.2.1"
+
     testCompile "org.hamcrest:hamcrest-all:1.1"
-	testCompile ("org.jmock:jmock:2.5.1") {
+    testCompile ("org.jmock:jmock:2.5.1") {
         exclude group: "junit", module: "junit-dep"
         exclude group: "org.hamcrest", module: "hamcrest-core"
         exclude group: "org.hamcrest", module: "hamcrest-library"
     }
-	testCompile ("org.jmock:jmock-junit4:2.5.1") {
-		exclude group: "junit", module: "junit-dep"
+    testCompile ("org.jmock:jmock-junit4:2.5.1") {
+        exclude group: "junit", module: "junit-dep"
         exclude group: "org.hamcrest", module: "hamcrest-core"
         exclude group: "org.hamcrest", module: "hamcrest-library"
-	}
-	testCompile "net.sf.json-lib:json-lib:2.4:jdk15"
-	testCompile "com.googlecode.jarjar:jarjar:1.3"
+    }
+    testCompile ("org.jmock:jmock-legacy:2.5.1") {
+        exclude group: "junit", module: "junit-dep"
+        exclude group: "org.hamcrest", module: "hamcrest-core"
+        exclude group: "org.hamcrest", module: "hamcrest-library"
+    }
+    testCompile "net.sf.json-lib:json-lib:2.4:jdk15"
+    testCompile "com.googlecode.jarjar:jarjar:1.3"
     testCompile "commons-io:commons-io:2.4"
 }
 
@@ -68,13 +74,13 @@ buildscript {
 }
 
 sourceSets {
-	main { compileClasspath += configurations.provided }
+    main { compileClasspath += configurations.provided }
 }
 
 eclipse {
-	classpath {
-		plusConfigurations += configurations.provided
-	}
+    classpath {
+        plusConfigurations += configurations.provided
+    }
 }
 
 jar {
@@ -89,16 +95,16 @@ task jarAll(type: Jar, dependsOn: jar) {
     def metaInfDir = "$buildDir/tmp/manifest"
     def jar = project.tasks.jar
     String fileName = jar.archiveName - ("." + jar.extension) + "-standalone." + jar.extension
-	File jarFile = new File(jar.destinationDir, fileName)
+    File jarFile = new File(jar.destinationDir, fileName)
     doFirst {
-    	manifest.writeTo("${metaInfDir}/MANIFEST.MF")
+        manifest.writeTo("${metaInfDir}/MANIFEST.MF")
         project.ant {
             taskdef name: "jarjar", classname: "com.tonicsystems.jarjar.JarJarTask", classpath: configurations.testCompile.asPath
             jarjar(jarfile: jarFile, manifest: "${metaInfDir}/MANIFEST.MF") {
                 zipfileset(src: jar.archivePath)
                 
                 configurations.compile.files.findAll { !it.name.contains("junit") }.each {
-                	zipfileset(src: it)
+                    zipfileset(src: it)
                 }
                 rule pattern: "org.mortbay.**", result: "wiremock.org.mortbay.@1"
                 rule pattern: "com.google.common.**", result: "wiremock.com.google.common.@1"
@@ -114,17 +120,17 @@ task jarAll(type: Jar, dependsOn: jar) {
         }
         
         Date date = new Date()
-		String name = jar.baseName
+        String name = jar.baseName
         project.artifacts.add('archives',
-			[
-				getClassifier: { -> "standalone" },
-				getDate: {-> date },
-				getExtension: {-> "jar" },
-				getType: {-> "jar" },
-				getFile: {-> jarFile },
-				getName: {-> name }
-			] as PublishArtifact
-		)
+            [
+                getClassifier: { -> "standalone" },
+                getDate: {-> date },
+                getExtension: {-> "jar" },
+                getType: {-> "jar" },
+                getFile: {-> jarFile },
+                getName: {-> name }
+            ] as PublishArtifact
+        )
     }
     manifest {
         attributes("Main-Class": "com.github.tomakehurst.wiremock.standalone.WireMockServerRunner")
@@ -161,17 +167,17 @@ uploadArchives {
     repositories {
         mavenDeployer {
             repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2') {
-            	authentication(userName: sonatypeUser , password: sonatypePassword)
-        	};
-        	beforeDeployment { deployment -> signPom(deployment) };
+                authentication(userName: sonatypeUser , password: sonatypePassword)
+            };
+            beforeDeployment { deployment -> signPom(deployment) };
             pom.artifactId = 'wiremock'
             pom.project {
-            	packaging 'jar'
-            	name 'WireMock'
-            	description 'A web service test double for all occasions'
-            	
-            	url 'https://github.com/tomakehurst/wiremock'
-            	
+                packaging 'jar'
+                name 'WireMock'
+                description 'A web service test double for all occasions'
+                
+                url 'https://github.com/tomakehurst/wiremock'
+                
                 licenses {
                     license {
                         name 'The Apache Software License, Version 2.0'
@@ -181,23 +187,23 @@ uploadArchives {
                 }
                 
                 scm {
-					connection 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
-					developerConnection 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
-					url 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
-				}
-				
-				developers {
-					developer {
-						id 'tomakehurst'
-						name 'Tom Akehurst'
-					}
-				}
+                    connection 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
+                    developerConnection 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
+                    url 'https://tomakehurst@github.com/tomakehurst/wiremock.git'
+                }
+                
+                developers {
+                    developer {
+                        id 'tomakehurst'
+                        name 'Tom Akehurst'
+                    }
+                }
             }
             
             pom.whenConfigured { thepom ->
-            	println thepom.dependencies.findAll({ it.artifactId.equals('junit') || it.scope.equals('test') });
-            	thepom.dependencies.removeAll(thepom.dependencies.findAll({ it.artifactId.equals('junit') || it.scope.equals('test') }));
-			}
+                println thepom.dependencies.findAll({ it.artifactId.equals('junit') || it.scope.equals('test') });
+                thepom.dependencies.removeAll(thepom.dependencies.findAll({ it.artifactId.equals('junit') || it.scope.equals('test') }));
+            }
         }
     }
 }
@@ -208,30 +214,30 @@ task addGitTag << {
 }
 
 task release {
-	dependsOn clean, jarAll, uploadArchives, addGitTag
+    dependsOn clean, jarAll, uploadArchives, addGitTag
 }
 
 task 'set-release-dir' << {
-	def console = System.console()
-	if (console) {
-		println ''
-		def releaseDir = console.readLine('> Please enter the full path to the release dir: ')
-		println ''
-		releaseDirUrl = 'file://' + releaseDir
-		if (!releaseDirUrl.endsWith('/')) {
-			releaseDirUrl = releaseDirUrl + '/';
-		}
-		
-		tasks.uploadArchives.repositories.mavenDeployer.repository.url = releaseDirUrl
-		
-		println 'Release dir set to: ' + releaseDirUrl
-	} else {
-		logger.error "Cannot get console."
-	}
+    def console = System.console()
+    if (console) {
+        println ''
+        def releaseDir = console.readLine('> Please enter the full path to the release dir: ')
+        println ''
+        releaseDirUrl = 'file://' + releaseDir
+        if (!releaseDirUrl.endsWith('/')) {
+            releaseDirUrl = releaseDirUrl + '/';
+        }
+        
+        tasks.uploadArchives.repositories.mavenDeployer.repository.url = releaseDirUrl
+        
+        println 'Release dir set to: ' + releaseDirUrl
+    } else {
+        logger.error "Cannot get console."
+    }
 }
 
 task 'release-to' {
-	dependsOn 'set-release-dir', clean, jarAll, uploadArchives, addGitTag
+    dependsOn 'set-release-dir', clean, jarAll, uploadArchives, addGitTag
 }
 
 task 'bump-version' << {
@@ -299,7 +305,7 @@ task wrapper(type: Wrapper) {
 }
 
 task 'add-copyright-headers' << {
-	def copyrightNotice = """/*
+    def copyrightNotice = """/*
  * Copyright (C) 2011 Thomas Akehurst
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -316,12 +322,12 @@ task 'add-copyright-headers' << {
  */
 """
 
-	def srcDir = new File('src')
-	srcDir.eachFileRecurse { file ->
-		if (file.name.endsWith(".java") && !file.text.contains(copyrightNotice)) {
-			println "Adding copyright header to $file.path"
-			def newFileText = copyrightNotice + file.text;
- 			file.text = newFileText;
-		}
-	}
+    def srcDir = new File('src')
+    srcDir.eachFileRecurse { file ->
+        if (file.name.endsWith(".java") && !file.text.contains(copyrightNotice)) {
+            println "Adding copyright header to $file.path"
+            def newFileText = copyrightNotice + file.text;
+            file.text = newFileText;
+        }
+    }
 }

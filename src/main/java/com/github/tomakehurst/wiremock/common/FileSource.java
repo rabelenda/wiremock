@@ -27,6 +27,8 @@ public interface FileSource {
 	String getPath();
 	List<TextFile> listFiles();
 	List<TextFile> listFilesRecursively();
+    List<TextFile> orderedListFiles();
+    List<TextFile> orderedListFilesRecursively();
 	void writeTextFile(String name, String contents);
     void writeBinaryFile(String name, byte[] contents);
     boolean exists();

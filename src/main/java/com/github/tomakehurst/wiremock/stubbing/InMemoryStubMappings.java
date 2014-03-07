@@ -17,34 +17,53 @@ package com.github.tomakehurst.wiremock.stubbing;
 
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
-import com.google.common.base.Predicate;
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
+import com.github.tomakehurst.wiremock.matching.PatternMatch;
 import com.google.common.collect.ImmutableList;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static com.github.tomakehurst.wiremock.http.ResponseDefinition.copyOf;
 import static com.github.tomakehurst.wiremock.stubbing.StubMapping.NOT_CONFIGURED;
-import static com.google.common.collect.Iterables.find;
 
 
 public class InMemoryStubMappings implements StubMappings {
 	
 	private final SortedConcurrentMappingSet mappings = new SortedConcurrentMappingSet();
 	private final ConcurrentHashMap<String, Scenario> scenarioMap = new ConcurrentHashMap<String, Scenario>();
-	
+
+    private class MatchingStubMapping {
+        private StubMapping mapping;
+        private MatchedGroups groups;
+
+        public MatchingStubMapping(StubMapping mapping, MatchedGroups groups) {
+            this.mapping = mapping;
+            this.groups = groups;
+        }
+    }
+
 	@Override
 	public ResponseDefinition serveFor(Request request) {
-		StubMapping matchingMapping = find(
-				mappings,
-				mappingMatchingAndInCorrectScenarioState(request),
-				StubMapping.NOT_CONFIGURED);
+        MatchingStubMapping match = findMatchingMapping(request);
+        StubMapping matchingMapping = match.mapping;
 		
 		notifyIfResponseNotConfigured(request, matchingMapping);
 		matchingMapping.updateScenarioStateIfRequired();
-		return copyOf(matchingMapping.getResponse());
+		return matchingMapping.getResponse().resolved(match.groups);
 	}
+
+    private MatchingStubMapping findMatchingMapping(Request request) {
+        for (StubMapping mapping: mappings) {
+            if (mapping.isIndependentOfScenarioState() || mapping.requiresCurrentScenarioState()) {
+                PatternMatch match = mapping.getRequest().isMatchedBy(request);
+                if (match.isMatched()) {
+                    return new MatchingStubMapping(mapping, match.getGroups());
+                }
+            }
+        }
+        return new MatchingStubMapping(NOT_CONFIGURED, MatchedGroups.noGroups());
+    }
 
 	private void notifyIfResponseNotConfigured(Request request, StubMapping matchingMapping) {
 		if (matchingMapping == NOT_CONFIGURED) {
@@ -81,12 +100,4 @@ public class InMemoryStubMappings implements StubMappings {
         return ImmutableList.copyOf(mappings);
     }
 
-    private Predicate<StubMapping> mappingMatchingAndInCorrectScenarioState(final Request request) {
-		return new Predicate<StubMapping>() {
-			public boolean apply(StubMapping mapping) {
-				return mapping.getRequest().isMatchedBy(request) &&
-				(mapping.isIndependentOfScenarioState() || mapping.requiresCurrentScenarioState());
-			}
-		};
-	}
 }

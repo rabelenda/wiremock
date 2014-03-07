@@ -16,7 +16,6 @@
 package com.github.tomakehurst.wiremock;
 
 import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.testsupport.WireMockResponse;

@@ -31,55 +31,55 @@ import static com.google.common.collect.Sets.newHashSet;
 
 public class RequestPatternBuilder {
 
-	private RequestMethod method;
-	private UrlMatchingStrategy urlMatchingStrategy;
-	private Map<String, ValueMatchingStrategy> headers = newLinkedHashMap();
+    private RequestMethod method;
+    private UrlMatchingStrategy urlMatchingStrategy;
+    private Map<String, ValueMatchingStrategy> headers = newLinkedHashMap();
     private Set<String> withoutHeaders = newHashSet();
-	private List<ValueMatchingStrategy> bodyPatterns = newArrayList();
-	
-	public RequestPatternBuilder(RequestMethod method,
-			UrlMatchingStrategy urlMatchingStrategy) {
-		this.method = method;
-		this.urlMatchingStrategy = urlMatchingStrategy;
-	}
-	
-	public RequestPatternBuilder withHeader(String key, ValueMatchingStrategy headerMatchingStrategy) {
-		headers.put(key, headerMatchingStrategy);
-		return this;
-	}
+    private List<ValueMatchingStrategy> bodyPatterns = newArrayList();
+    
+    public RequestPatternBuilder(RequestMethod method,
+            UrlMatchingStrategy urlMatchingStrategy) {
+        this.method = method;
+        this.urlMatchingStrategy = urlMatchingStrategy;
+    }
+    
+    public RequestPatternBuilder withHeader(String key, ValueMatchingStrategy headerMatchingStrategy) {
+        headers.put(key, headerMatchingStrategy);
+        return this;
+    }
 
     public RequestPatternBuilder withoutHeader(String key) {
         withoutHeaders.add(key);
         return this;
     }
-	
-	public RequestPatternBuilder withRequestBody(ValueMatchingStrategy bodyMatchingStrategy) {
-		bodyPatterns.add(bodyMatchingStrategy);
-		return this;
-	}
+    
+    public RequestPatternBuilder withRequestBody(ValueMatchingStrategy bodyMatchingStrategy) {
+        bodyPatterns.add(bodyMatchingStrategy);
+        return this;
+    }
 
     public static RequestPatternBuilder allRequests() {
         UrlMatchingStrategy matchAllUrls = new UrlMatchingStrategy();
         matchAllUrls.setUrlPattern(".*");
         return new RequestPatternBuilder(RequestMethod.ANY, matchAllUrls);
     }
-	
-	public RequestPattern build() {
-		RequestPattern requestPattern = new RequestPattern();
-		requestPattern.setMethod(method);
-		urlMatchingStrategy.contributeTo(requestPattern);
-		for (Map.Entry<String, ValueMatchingStrategy> header: headers.entrySet()) {
-			requestPattern.addHeader(header.getKey(), header.getValue().asValuePattern());
-		}
+    
+    public RequestPattern build() {
+        RequestPattern requestPattern = new RequestPattern();
+        requestPattern.setMethod(method);
+        urlMatchingStrategy.contributeTo(requestPattern);
+        for (Map.Entry<String, ValueMatchingStrategy> header: headers.entrySet()) {
+            requestPattern.addHeader(header.getKey(), header.getValue().asValuePattern());
+        }
 
         for (String key: withoutHeaders) {
             requestPattern.addHeader(key, ValuePattern.absent());
         }
-		
-		if (!bodyPatterns.isEmpty()) {
-			requestPattern.setBodyPatterns(newArrayList(transform(bodyPatterns, toValuePattern)));
-		}
-		
-		return requestPattern;
-	}
+
+        if (!bodyPatterns.isEmpty()) {
+            requestPattern.setBodyPatterns(newArrayList(transform(bodyPatterns, toValuePattern)));
+        }
+        
+        return requestPattern;
+    }
 }

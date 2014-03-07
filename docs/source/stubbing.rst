@@ -396,6 +396,33 @@ The JSON API accepts this as a base64 string (to avoid stupidly long JSON docume
         }
     }
 
+.. _stubbing-body-template:
+The most powerful and complex way of specifying a body is through a body template. It is possible to specify through the
+bodyTemplate response property a String Fromat (http://docs.oracle.com/javase/1.5.0/docs/api/java/util/Formatter.html) value.
+By doing so and in combination with body, header and URL regex patterns in requests, it is possible for one mapping to
+output different response body for each request.
+
+.. code-block:: java
+
+    stubFor(get(urlMatching("/service\\?param1=([^&]+)&param2=([^&]+)"))
+            .willReturn(aResponse()
+                    .withBodyTemplate("You specified param1 to '%s' and param2 to '%s'")));
+
+Or
+
+.. code-block:: javascript
+
+    {
+        "request": {
+            "method": "GET",
+            "url": "/service\\?param1=([^&]+)&param2=([^&]+)"
+        },
+        "response": {
+            "status": 200,
+            "bodyTemplate": "You specified param1 to '%s' and param2 to '%s'"
+        }
+    }
+
 .. _stubbing-saving-stubs:
 
 Saving stubs

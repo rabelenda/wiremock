@@ -21,6 +21,8 @@ import com.google.common.io.Files;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -45,7 +47,7 @@ public abstract class AbstractFileSource implements FileSource {
 
     @Override
     public TextFile getTextFileNamed(final String name) {
-    	return new TextFile(new File(rootDirectory, name));
+        return new TextFile(new File(rootDirectory, name));
     }
 
     @Override
@@ -60,46 +62,74 @@ public abstract class AbstractFileSource implements FileSource {
 
     @Override
     public String getPath() {
-    	return rootDirectory.getPath();
+        return rootDirectory.getPath();
     }
 
     @Override
     public List<TextFile> listFiles() {
-    	assertExistsAndIsDirectory();
-    	List<File> fileList = asList(rootDirectory.listFiles(filesOnly()));
-    	return toTextFileList(fileList);
+        assertExistsAndIsDirectory();
+        List<File> fileList = asList(rootDirectory.listFiles(filesOnly()));
+        return toTextFileList(fileList);
+    }
+
+    @Override
+    public List<TextFile> orderedListFiles() {
+        assertExistsAndIsDirectory();
+        List<File> fileList = asList(rootDirectory.listFiles(filesOnly()));
+        Collections.sort(fileList);
+        return toTextFileList(fileList);
     }
 
     @Override
     public List<TextFile> listFilesRecursively() {
-    	assertExistsAndIsDirectory();
-    	List<File> fileList = newArrayList();
-    	recursivelyAddFilesToList(rootDirectory, fileList);
-    	return toTextFileList(fileList);
+        assertExistsAndIsDirectory();
+        List<File> fileList = newArrayList();
+        recursivelyAddFilesToList(rootDirectory, fileList);
+        return toTextFileList(fileList);
     }
 
     private void recursivelyAddFilesToList(File root, List<File> fileList) {
-    	File[] files = root.listFiles();
-    	for (File file: files) {
-    		if (file.isDirectory()) {
-    			recursivelyAddFilesToList(file, fileList);
-    		} else {
-    			fileList.add(file);
-    		}
-    	}
+        File[] files = root.listFiles();
+        for (File file: files) {
+            if (file.isDirectory()) {
+                recursivelyAddFilesToList(file, fileList);
+            } else {
+                fileList.add(file);
+            }
+        }
+    }
+
+    @Override
+    public List<TextFile> orderedListFilesRecursively() {
+        assertExistsAndIsDirectory();
+        List<File> fileList = newArrayList();
+        recursivelyAddOrderedFilesToList(rootDirectory, fileList);
+        return toTextFileList(fileList);
+    }
+
+    private void recursivelyAddOrderedFilesToList(File root, List<File> fileList) {
+        File[] files = root.listFiles();
+        Arrays.sort(files);
+        for (File file: files) {
+            if (file.isDirectory()) {
+                recursivelyAddOrderedFilesToList(file, fileList);
+            } else {
+                fileList.add(file);
+            }
+        }
     }
 
     private List<TextFile> toTextFileList(List<File> fileList) {
-    	return newArrayList(transform(fileList, new Function<File, TextFile>() {
-    		public TextFile apply(File input) {
-    			return new TextFile(input.getPath());
-    		}
-    	}));
+        return newArrayList(transform(fileList, new Function<File, TextFile>() {
+            public TextFile apply(File input) {
+                return new TextFile(input.getPath());
+            }
+        }));
     }
 
     @Override
     public void writeTextFile(String name, String contents) {
-    	writeTextFileAndTranslateExceptions(contents, writableFileFor(name));
+        writeTextFileAndTranslateExceptions(contents, writableFileFor(name));
     }
 
     @Override
@@ -149,11 +179,11 @@ public abstract class AbstractFileSource implements FileSource {
     }
 
     private FileFilter filesOnly() {
-    	return new FileFilter() {
-    		public boolean accept(File file) {
-    			return file.isFile();
-    		}
-    	};
+        return new FileFilter() {
+            public boolean accept(File file) {
+                return file.isFile();
+            }
+        };
     }
 
 }

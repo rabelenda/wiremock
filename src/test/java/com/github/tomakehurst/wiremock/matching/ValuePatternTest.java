@@ -26,13 +26,14 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(JMock.class)
 public class ValuePatternTest {
-	
-	private ValuePattern valuePattern;
+
+    private ValuePattern valuePattern;
     private Mockery context;
 	
 	@Before
@@ -46,126 +47,275 @@ public class ValuePatternTest {
         LocalNotifier.set(null);
     }
 
-	@Test
-	public void matchesOnEqualTo() {
-		valuePattern.setEqualTo("text/plain");
-		assertTrue(valuePattern.isMatchFor("text/plain"));
-	}
-	
-	@Test
-	public void matchesOnRegex() {
-		valuePattern.setMatches("[0-9]{6}");
-		assertTrue(valuePattern.isMatchFor("938475"));
-		assertFalse(valuePattern.isMatchFor("abcde"));
-	}
-	
-	@Test
-	public void matchesOnNegativeRegex() {
-		valuePattern.setDoesNotMatch("[0-9]{6}");
-		assertFalse(valuePattern.isMatchFor("938475"));
-		assertTrue(valuePattern.isMatchFor("abcde"));
-	}
-	
-	@Test
-	public void matchesOnContains() {
-		valuePattern.setContains("some text");
-		assertFalse(valuePattern.isMatchFor("Nothing to see here"));
-		assertTrue(valuePattern.isMatchFor("There's some text here"));
-	}
-
     @Test
-    public void matchesOnAbsent() {
-        valuePattern = ValuePattern.absent();
-        assertFalse("Absent value should not be a match for a string", valuePattern.isMatchFor("Something"));
-        assertTrue("Absent value should be match for null", valuePattern.isMatchFor(null));
-        assertTrue("isAbsent() should be true", valuePattern.isAbsent());
+    public void matchesOnEqualToWithSameValue() {
+        valuePattern.setEqualTo("my-value");
+        assertTrue(valuePattern.isMatchFor("my-value").isMatched());
+	}
+	
+    @Test
+    public void doesNotMatchOnEqualToWithOtherValue() {
+        valuePattern.setEqualTo("my-value");
+        assertFalse(valuePattern.isMatchFor("other-value").isMatched());
     }
 
     @Test
-    public void matchesOnIsEqualToJson() {
+    public void emptyGroupsOnEqualToWithSameValue() {
+        valuePattern.setEqualTo("my-value");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("my-value").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnEqualToWithOtherValue() {
+        valuePattern.setEqualTo("my-value");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("other-value").getGroups());
+    }
+
+    @Test
+    public void matchesOnRegexWithMatchingValue() {
+        valuePattern.setMatches("[0-9]{6}");
+        assertTrue(valuePattern.isMatchFor("938475").isMatched());
+    }
+
+    @Test
+    public void doesNotMatchOnNotMatchingRegexWithNotMatchingValue() {
+        valuePattern.setMatches("[0-9]{6}");
+        assertFalse(valuePattern.isMatchFor("abcde").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnRegexWithoutGroupsWithMatchingValue() {
+        valuePattern.setMatches("[0-9]{6}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("938475").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnRegexWithoutGroupsWithNotMatchingValue() {
+        valuePattern.setMatches("[0-9]{6}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("abcde").getGroups());
+    }
+
+    @Test
+    public void matchingGroupsOnRegexWithGroupsWithMatchingValue() {
+        valuePattern.setMatches("[0-9]{2}([0-9]{2})[0-9]{2}");
+        assertEquals(new MatchedGroups("84"), valuePattern.isMatchFor("938475").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnRegexWithAnonymousGroupsWithMatchingValue() {
+        valuePattern.setMatches("[0-9]{2}(?:[0-9]{2})[0-9]{2}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("938475").getGroups());
+    }
+
+    @Test
+    public void doesNotMatchOnNegativeRegexWithMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{6}");
+        assertFalse(valuePattern.isMatchFor("938475").isMatched());
+    }
+
+    @Test
+    public void matchesOnNegativeRegexWithNotMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{6}");
+        assertTrue(valuePattern.isMatchFor("abcde").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnNegativeRegexWithoutGroupsWithMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{6}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("938475").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnNegativeRegexWithoutGroupsWithNotMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{6}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("abcde").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnNegativeRegexWithGroupsWithMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{2}([0-9]{2})[0-9]{2}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("938475").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnNegativeRegexWithGroupsWithNotMatchingValue() {
+        valuePattern.setDoesNotMatch("[0-9]{2}([0-9]{2})[0-9]{2}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("abcde").getGroups());
+    }
+
+    @Test
+    public void matchesOnContainsWithTextContainingSubText() {
+        valuePattern.setContains("some text");
+        assertTrue(valuePattern.isMatchFor("There's some text here").isMatched());
+    }
+
+    @Test
+    public void doesNotMatchOnContainsWithTextNotContainingSubText() {
+        valuePattern.setContains("some text");
+        assertFalse(valuePattern.isMatchFor("Nothing to see here").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnContainsWithTextContainingSubText() {
+        valuePattern.setContains("some text");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("There's some text here")
+                .getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnContainsWithTextNotContainingSubText() {
+        valuePattern.setContains("some text");
+        assertEquals(MatchedGroups.noGroups(),
+                valuePattern.isMatchFor("Nothing to see here").getGroups());
+    }
+
+    @Test
+    public void matchesOnAbsentWithNull() {
+        valuePattern = ValuePattern.absent();
+        assertTrue(valuePattern.isMatchFor(null).isMatched());
+    }
+
+    @Test
+    public void doesNotMatchOnAbsentWithSomeValue() {
+        valuePattern = ValuePattern.absent();
+        assertFalse(valuePattern.isMatchFor("blah").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnAbsentWithNull() {
+        valuePattern = ValuePattern.absent();
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor(null).getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnAbsentWithSomeValue() {
+        valuePattern = ValuePattern.absent();
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("blah").getGroups());
+    }
+
+    @Test
+    public void trueOnIsAbsent() {
+        valuePattern = ValuePattern.absent();
+        assertTrue(valuePattern.isAbsent());
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void doesNotPermitMoreThanOneTypeOfMatch() {
+        valuePattern.setEqualTo("my-value");
+        valuePattern.setMatches("[0-9]{6}");
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void doesNotPermitMoreThanOneTypeOfMatchWithOtherOrdering() {
+        valuePattern.setMatches("[0-9]{6}");
+        valuePattern.setEqualTo("my-value");
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void doesNotPermitMoreThanOneTypeOfMatchWithOtherDoesNotMatch() {
+        valuePattern.setEqualTo("my-value");
+        valuePattern.setDoesNotMatch("[0-9]{6}");
+    }
+
+    @Test(expected=IllegalStateException.class)
+    public void doesNotPermitZeroMatchTypes() {
+        valuePattern.isMatchFor("blah");
+    }
+
+    @Test
+    public void matchesOnIsEqualToJsonWithSameJson() {
         valuePattern.setEqualToJson("{\"x\":0}");
-        assertTrue("Expected exact match", valuePattern.isMatchFor("{\"x\":0}"));
-        assertTrue("Expected number json match", valuePattern.isMatchFor("{\"x\":0.0}"));
+        assertTrue(valuePattern.isMatchFor("{\"x\":0}").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnIsEqualToJsonWithSameJson() {
+        valuePattern.setEqualToJson("{\"x\":0}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("{\"x\":0}").getGroups());
+    }
+
+    @Test
+    public void emptyGroupsOnIsEqualToJsonWithDifferentJson() {
+        valuePattern.setEqualToJson("{\"x\":0}");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("{\"x\":1}").getGroups());
+    }
+
+    @Test
+    public void matchesOnIsEqualToJsonWithJsonWithNumberMatch() {
+        valuePattern.setEqualToJson("{\"x\":0}");
+        assertTrue(valuePattern.isMatchFor("{\"x\":0.0}").isMatched());
     }
     
     @Test
     public void matchesOnIsEqualToJsonMoveFields() {
         valuePattern.setEqualToJson("{\"x\":0,\"y\":1}");
-        assertTrue("Expected exact match", valuePattern.isMatchFor("{\"x\":0,\"y\":1}"));
-        assertTrue("Expected move field json match", valuePattern.isMatchFor("{\"y\":1,\"x\":0.0}"));
+        assertTrue(valuePattern.isMatchFor("{\"y\":1,\"x\":0.0}").isMatched());
     }
 
     @Test
     public void permitsExtraFieldsWhenJsonCompareModeIsLENIENT() {
         valuePattern.setEqualToJson("{ \"x\": 0 }");
         valuePattern.setJsonCompareMode(JSONCompareMode.LENIENT);
-        assertTrue("Expected match when unknown field is present in LENIENT mode", valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }"));
+        assertTrue(valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }").isMatched());
     }
 
     @Test
     public void doesNotMatchOnEqualToJsonWhenFieldMissing() {
         valuePattern.setEqualToJson("{ \"x\": 0 }");
-        assertFalse("Expected no match when unknown field is present", valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }"));
-    }
-    
-    @Test
-    public void matchesOnBasicJsonPaths() {
-        valuePattern.setMatchesJsonPaths("$.one");
-        assertTrue("Expected match when JSON attribute is present", valuePattern.isMatchFor("{ \"one\": 1 }"));
-        assertFalse("Expected no match when JSON attribute is absent", valuePattern.isMatchFor("{ \"two\": 2 }"));
+        assertFalse(valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }").isMatched());
     }
 
     @Test
-    public void matchesOnJsonPathsWithFilters() {
+    public void matchesOnBasicJsonPathsWithMatchingJson() {
+        valuePattern.setMatchesJsonPaths("$.one");
+        assertTrue(valuePattern.isMatchFor("{ \"one\": 1 }").isMatched());
+    }
+
+    @Test
+    public void doesNotMatchOnBasicJsonPathsWithNotMatchingJson() {
+        valuePattern.setMatchesJsonPaths("$.one");
+        assertFalse(valuePattern.isMatchFor("{ \"two\": 2 }").isMatched());
+    }
+
+    @Test
+    public void matchesOnJsonPathsWithFiltersAndMatchingJson() {
+        assertTrue(tryMatchingJsonPathWithFilter(
+                "{ \"numbers\": [ {\"number\": 1}, {\"number\": 2} ]}").isMatched());
+    }
+
+    private PatternMatch tryMatchingJsonPathWithFilter(String json) {
         valuePattern.setMatchesJsonPaths("$.numbers[?(@.number == '2')]");
-        assertTrue("Expected match when JSON attribute is present", valuePattern.isMatchFor("{ \"numbers\": [ {\"number\": 1}, {\"number\": 2} ]}"));
-        assertFalse("Expected no match when JSON attribute is absent", valuePattern.isMatchFor("{ \"numbers\": [{\"number\": 7} ]}"));
+        return valuePattern.isMatchFor(json);
+    }
+
+    @Test
+    public void doesNotMatchOnJsonPathsWithFiltersAndNotMatchingJson() {
+        assertFalse(tryMatchingJsonPathWithFilter("{ \"numbers\": [{\"number\": 7} ]}").isMatched());
     }
 
     @Test
     public void matchesOnJsonPathsWithFiltersOnNestedObjects() {
+        assertTrue(tryMatchingOnJsonPathWithFilterOnNestedObject(
+                "{ \"things\": { \"thingOne\": { \"innerOne\": 11 }, \"thingTwo\": 2 }}").isMatched());
+    }
+
+    private PatternMatch tryMatchingOnJsonPathWithFilterOnNestedObject(String json) {
         valuePattern.setMatchesJsonPaths("$..*[?(@.innerOne == 11)]");
-        assertTrue("Expected match", valuePattern.isMatchFor("{ \"things\": { \"thingOne\": { \"innerOne\": 11 }, \"thingTwo\": 2 }}"));
+        return valuePattern.isMatchFor(json);
+    }
+
+    @Test
+    public void doesNotMatchWhenJsonMatchWithInvalidJson() {
+        valuePattern.setMatchesJsonPaths("$.one");
+        assertFalse(valuePattern.isMatchFor("Not a JSON document").isMatched());
     }
 
     @Test
     public void providesSensibleNotificationWhenJsonMatchFailsDueToInvalidJson() {
-        expectInfoNotification("Warning: JSON path expression '$.something' failed to match document 'Not a JSON document' because the JSON document couldn't be parsed");
-
-        valuePattern.setMatchesJsonPaths("$.something");
-        assertFalse("Expected the match to fail", valuePattern.isMatchFor("Not a JSON document"));
+        expectInfoNotification("Warning: JSON path expression '$.one' failed to match document 'Not a JSON document' because the JSON document couldn't be parsed");
+        valuePattern.setMatchesJsonPaths("$.one");
+        valuePattern.isMatchFor("Not a JSON document");
     }
-
-    @Test
-    public void providesSensibleNotificationWhenJsonMatchFailsDueToMissingAttributeJson() {
-        expectInfoNotification("Warning: JSON path expression '$.something' failed to match document '{ \"nothing\": 1 }' because the JSON path didn't match the document structure");
-
-        valuePattern.setMatchesJsonPaths("$.something");
-        assertFalse("Expected the match to fail", valuePattern.isMatchFor("{ \"nothing\": 1 }"));
-    }
-
-    @Test(expected=IllegalStateException.class)
-	public void doesNotPermitMoreThanOneTypeOfMatch() {
-		valuePattern.setEqualTo("my-value");
-		valuePattern.setMatches("[0-9]{6}");
-	}
-
-	@Test(expected=IllegalStateException.class)
-	public void doesNotPermitMoreThanOneTypeOfMatchWithOtherOrdering() {
-		valuePattern.setMatches("[0-9]{6}");
-		valuePattern.setEqualTo("my-value");
-	}
-
-	@Test(expected=IllegalStateException.class)
-	public void doesNotPermitMoreThanOneTypeOfMatchWithOtherDoesNotMatch() {
-		valuePattern.setEqualTo("my-value");
-		valuePattern.setDoesNotMatch("[0-9]{6}");
-	}
-
-	@Test(expected=IllegalStateException.class)
-	public void doesNotPermitZeroMatchTypes() {
-		valuePattern.isMatchFor("blah");
-	}
 
     private void expectInfoNotification(final String message) {
         final Notifier notifier = context.mock(Notifier.class);
@@ -174,4 +324,12 @@ public class ValuePatternTest {
         }});
         LocalNotifier.set(notifier);
     }
+
+    @Test
+    public void providesSensibleNotificationWhenJsonDoesNotMatch() {
+        expectInfoNotification("Warning: JSON path expression '$.one' failed to match document '{ \"two\": 2 }' because the JSON path didn't match the document structure");
+        valuePattern.setMatchesJsonPaths("$.one");
+        valuePattern.isMatchFor("{ \"two\": 2 }");
+    }
+
 }

@@ -67,7 +67,7 @@ public class RequestPatternTest {
 			.withUrl("/some/resource/path")
 			.withMethod(POST)
 			.build();
-		assertTrue(requestPattern.isMatchedBy(request));
+		assertTrue(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -77,7 +77,7 @@ public class RequestPatternTest {
 			.withUrl("/wrong/path")
 			.withMethod(POST)
 			.build();
-		assertFalse(requestPattern.isMatchedBy(request));
+		assertFalse(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -93,7 +93,7 @@ public class RequestPatternTest {
 			.withHeader("Content-Type", "application/json")
 			.build();
 		
-		assertTrue(requestPattern.isMatchedBy(request));
+		assertTrue(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -110,7 +110,7 @@ public class RequestPatternTest {
 			.withHeader("Accept", "text/plain")
 			.build();
 		
-		assertFalse(requestPattern.isMatchedBy(request));
+		assertFalse(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -128,7 +128,7 @@ public class RequestPatternTest {
 			.withHeader("Content-Type", "text/xml")
 			.build();
 		
-		assertFalse(requestPattern.isMatchedBy(request));
+		assertFalse(requestPattern.isMatchedBy(request).isMatched());
 	}
 
     @Test
@@ -149,8 +149,8 @@ public class RequestPatternTest {
                 .withHeader("X-Multi", "two")
                 .build();
 
-        assertTrue("Request should match request pattern with header X-Multi:one", requestPattern1.isMatchedBy(request));
-        assertTrue("Request should match request pattern with header X-Multi:two", requestPattern2.isMatchedBy(request));
+        assertTrue("Request should match request pattern with header X-Multi:one", requestPattern1.isMatchedBy(request).isMatched());
+        assertTrue("Request should match request pattern with header X-Multi:two", requestPattern2.isMatchedBy(request).isMatched());
     }
 
 	@Test
@@ -163,7 +163,7 @@ public class RequestPatternTest {
 			.withMethod(GET)
 			.build();
 		
-		assertTrue(requestPattern.isMatchedBy(request));
+		assertTrue(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -176,13 +176,13 @@ public class RequestPatternTest {
 			.withMethod(GET)
 			.build();
 		
-		assertFalse(requestPattern.isMatchedBy(request));
+		assertFalse(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test(expected=IllegalStateException.class)
 	public void shouldNotPermitBothUrlAndUrlPattern() {
 		RequestPattern requestPattern = new RequestPattern();
-		requestPattern.setUrlPattern("/(.*?");
+		requestPattern.setUrlPattern("/(.*)?");
 		requestPattern.setUrl("/some/url");
 		
 		requestPattern.isMatchedBy(aRequest(context).build());
@@ -204,7 +204,7 @@ public class RequestPatternTest {
 			.withBody(XML_SAMPLE)
 			.build();
 		
-		assertTrue(requestPattern.isMatchedBy(request));
+		assertTrue(requestPattern.isMatchedBy(request).isMatched());
 	}
 	
 	@Test
@@ -220,7 +220,7 @@ public class RequestPatternTest {
 			.withBody("<important>Wrong value</important>")
 			.build();
 		
-		assertFalse(requestPattern.isMatchedBy(request));
+		assertFalse(requestPattern.isMatchedBy(request).isMatched());
 	}
 
     @Test
@@ -233,7 +233,7 @@ public class RequestPatternTest {
 				.withUrl("/any/method")
 				.withMethod(method)
 				.build();
-			assertTrue("Method in request pattern is ANY so any method should match", requestPattern.isMatchedBy(request));
+			assertTrue("Method in request pattern is ANY so any method should match", requestPattern.isMatchedBy(request).isMatched());
 		}
 	}
 
@@ -249,7 +249,7 @@ public class RequestPatternTest {
                 .withHeader("X-Another-Header", "value")
                 .build();
 
-        assertTrue("Request is not a match for the request pattern", requestPattern.isMatchedBy(request));
+        assertTrue("Request is not a match for the request pattern", requestPattern.isMatchedBy(request).isMatched());
     }
 
     @Test
@@ -264,7 +264,7 @@ public class RequestPatternTest {
                 .withHeader("X-My-Header", "value")
                 .build();
 
-        assertFalse("Request is a match for the request pattern and should not be", requestPattern.isMatchedBy(request));
+        assertFalse("Request is a match for the request pattern and should not be", requestPattern.isMatchedBy(request).isMatched());
     }
 
     @Test

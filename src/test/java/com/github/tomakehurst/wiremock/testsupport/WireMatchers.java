@@ -25,6 +25,7 @@ import org.hamcrest.TypeSafeMatcher;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Iterator;
 
@@ -38,7 +39,7 @@ public class WireMatchers {
 
 			@Override
 			public void describeTo(Description desc) {
-                desc.appendText("Expected:\n" + expectedJson);
+                desc.appendText(expectedJson);
 			}
 
 			@Override
@@ -59,7 +60,7 @@ public class WireMatchers {
     
             @Override
             public void describeTo(Description description) {
-                description.appendText("Should match " + regex);
+                description.appendText("match with " + regex);
                 
             }
     
@@ -76,7 +77,7 @@ public class WireMatchers {
 
 			@Override
 			public void describeTo(Description desc) {
-				desc.appendText("Collection must match exactly");
+				desc.appendText(Arrays.asList(items).toString());
 			}
 
 			@Override
@@ -99,7 +100,7 @@ public class WireMatchers {
 
 			@Override
 			public void describeTo(Description desc) {
-				desc.appendText("Collection elements must match, but don't have to be in the same order.");
+				desc.appendText("Unordered collection of " + Arrays.asList(items));
 			}
 
 			@Override

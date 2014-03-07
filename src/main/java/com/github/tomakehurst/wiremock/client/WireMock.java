@@ -113,6 +113,14 @@ public class WireMock {
         defaultInstance.resetToDefaultMappings();
     }
 
+    public void resetRequestsJournal() {
+        admin.resetRequestsJournal();
+    }
+
+    public static void resetRequests() {
+        defaultInstance.resetRequestsJournal();
+    }
+
 	public void register(MappingBuilder mappingBuilder) {
 		StubMapping mapping = mappingBuilder.build();
 		admin.addStubMapping(mapping);

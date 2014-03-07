@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.tomakehurst.wiremock.verification;
+
+package com.github.tomakehurst.wiremock.verification.journal;
 
 import com.github.tomakehurst.wiremock.http.Request;
-import com.github.tomakehurst.wiremock.http.RequestListener;
 import com.github.tomakehurst.wiremock.http.Response;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.size;
 
-public class InMemoryRequestJournal implements RequestListener, RequestJournal {
-	
-	private ConcurrentLinkedQueue<LoggedRequest> requests = new ConcurrentLinkedQueue<LoggedRequest>();
+public class UnboundedInMemoryRequestJournal implements ImmutableCapacityJournal {
 
-	@Override
-	public int countRequestsMatching(RequestPattern requestPattern) {
-		return size(filter(requests, matchedBy(requestPattern))); 
-	}
+    private final List<LoggedRequest> requests = new ArrayList<LoggedRequest>();
+
+    @Override
+    public int countRequestsMatching(RequestPattern requestPattern) {
+        return size(filter(requests, matchedBy(requestPattern)));
+    }
 
     @Override
     public List<LoggedRequest> getRequestsMatching(RequestPattern requestPattern) {
@@ -43,26 +44,31 @@ public class InMemoryRequestJournal implements RequestListener, RequestJournal {
     }
 
     private Predicate<Request> matchedBy(final RequestPattern requestPattern) {
-		return new Predicate<Request>() {
-			public boolean apply(Request input) {
-				return requestPattern.isMatchedBy(input);
-			}
-		};
-	}
-
-	@Override
-	public void requestReceived(Request request, Response response) {
-		requests.add(LoggedRequest.createFrom(request));
-	}
+        return new Predicate<Request>() {
+            public boolean apply(Request input) {
+                return requestPattern.isMatchedBy(input).isMatched();
+            }
+        };
+    }
 
     @Override
     public void requestReceived(Request request) {
-        requestReceived(request, null);
+        requests.add(LoggedRequest.createFrom(request));
     }
 
-	@Override
-	public void reset() {
-		requests.clear();
-	}
+    @Override
+    public void reset() {
+        requests.clear();
+    }
+
+    @Override
+    public void load(List<LoggedRequest> reqs) {
+        requests.addAll(reqs);
+    }
+
+    @Override
+    public List<LoggedRequest> getAllRequests() {
+        return ImmutableList.copyOf(requests);
+    }
 
 }

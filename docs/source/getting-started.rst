@@ -201,6 +201,9 @@ Disable the request journal, which records incoming requests for later verificat
 (and serve stubs) for long periods (without resetting) without exhausting the heap. The ``--record-mappings`` option isn't
 available if this one is specified.
 
+``--journal-capacity``:
+Set the capacity of the in memory journal. See :ref:`journal-capacity`.
+
 ``--help``:
 Show command line help
 

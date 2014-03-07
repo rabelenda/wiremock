@@ -21,8 +21,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize.Inclusion;
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.common.Json;
+import com.github.tomakehurst.wiremock.matching.MatchedGroups;
+import com.google.common.base.Objects;
 
-import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 
 import static com.google.common.base.Charsets.UTF_8;
@@ -36,6 +37,7 @@ public class ResponseDefinition {
 	private int status;
 	private byte[] body;
     private boolean isBinaryBody = false;
+    private String bodyTemplate;
 	private String bodyFileName;
 	private HttpHeaders headers;
 	private Integer fixedDelayMilliseconds;
@@ -46,20 +48,28 @@ public class ResponseDefinition {
 	private boolean wasConfigured = true;
 	private Request originalRequest;
 	
-	public static ResponseDefinition copyOf(ResponseDefinition original) {
+	public ResponseDefinition resolved(MatchedGroups groups) {
 	    ResponseDefinition newResponseDef = new ResponseDefinition();
-	    newResponseDef.status = original.status;
-	    newResponseDef.body = original.body;
-        newResponseDef.isBinaryBody = original.isBinaryBody;
-	    newResponseDef.bodyFileName = original.bodyFileName;
-	    newResponseDef.headers = original.headers;
-	    newResponseDef.fixedDelayMilliseconds = original.fixedDelayMilliseconds;
-	    newResponseDef.proxyBaseUrl = original.proxyBaseUrl;
-	    newResponseDef.fault = original.fault;
-	    newResponseDef.wasConfigured = original.wasConfigured;
+	    newResponseDef.status = status;
+        if (bodyTemplate != null) {
+            newResponseDef.body = resolvedBody(groups);
+        } else {
+	        newResponseDef.body = body;
+        }
+        newResponseDef.isBinaryBody = isBinaryBody;
+	    newResponseDef.bodyFileName = bodyFileName;
+	    newResponseDef.headers = headers;
+	    newResponseDef.fixedDelayMilliseconds = fixedDelayMilliseconds;
+	    newResponseDef.proxyBaseUrl = proxyBaseUrl;
+	    newResponseDef.fault = fault;
+	    newResponseDef.wasConfigured = wasConfigured;
 	    return newResponseDef;
 	}
-	
+
+    private byte[] resolvedBody(MatchedGroups groups) {
+        return String.format(bodyTemplate, groups.toArray()).getBytes(Charset.forName(UTF_8.name()));
+    }
+
 	public HttpHeaders getHeaders() {
 		return headers;
 	}
@@ -136,6 +146,7 @@ public class ResponseDefinition {
     }
 
     public void setBase64Body(String base64Body) {
+        checkNotAlreadySetBody(base64Body);
         isBinaryBody = true;
         body = parseBase64Binary(base64Body);
     }
@@ -144,14 +155,32 @@ public class ResponseDefinition {
     // name is marked as ignored (see currently open JACKSON-783 bug)
     @JsonProperty
 	public void setBody(final String body) {
+        checkNotAlreadySetBody(body);
 		this.body = (body!=null) ? body.getBytes(Charset.forName(UTF_8.name())) : null;
         isBinaryBody = false;
 	}
 
     @JsonIgnore
     public void setBody(final byte[] body) {
+        checkNotAlreadySetBody(body);
         this.body = body;
         isBinaryBody = true;
+    }
+
+    public String getBodyTemplate() {
+        return bodyTemplate;
+    }
+
+    public void setBodyTemplate(String bodyTemplate) {
+        checkNotAlreadySetBody(bodyTemplate);
+        this.bodyTemplate = bodyTemplate;
+        isBinaryBody = false;
+    }
+
+    private void checkNotAlreadySetBody(Object value) {
+        if (value != null && (body != null || bodyTemplate != null || bodyFileName != null)) {
+            throw new IllegalStateException("Body was already set, can not be set again.");
+        }
     }
 
     public void setStatus(final int status) {
@@ -171,6 +200,7 @@ public class ResponseDefinition {
 	}
 
 	public void setBodyFileName(final String bodyFileName) {
+        checkNotAlreadySetBody(bodyFileName);
 		this.bodyFileName = bodyFileName;
 	}
 	
@@ -237,24 +267,7 @@ public class ResponseDefinition {
 
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((body == null) ? 0 : body.hashCode());
-		result = prime * result
-				+ ((bodyFileName == null) ? 0 : bodyFileName.hashCode());
-		result = prime * result + ((fault == null) ? 0 : fault.hashCode());
-		result = prime
-				* result
-				+ ((fixedDelayMilliseconds == null) ? 0
-						: fixedDelayMilliseconds.hashCode());
-		result = prime * result + ((headers == null) ? 0 : headers.hashCode());
-		result = prime * result
-				+ ((originalRequest == null) ? 0 : originalRequest.hashCode());
-		result = prime * result
-				+ ((proxyBaseUrl == null) ? 0 : proxyBaseUrl.hashCode());
-		result = prime * result + status;
-		result = prime * result + (wasConfigured ? 1231 : 1237);
-		return result;
+        return Objects.hashCode(body, bodyFileName, bodyTemplate, fault, fixedDelayMilliseconds, headers, originalRequest, proxyBaseUrl, status, wasConfigured);
 	}
 
 	@Override
@@ -269,51 +282,21 @@ public class ResponseDefinition {
 			return false;
 		}
 		final ResponseDefinition other = (ResponseDefinition) obj;
-		if (body == null) {
+        if (body == null) {
 			if (other.body != null) {
 				return false;
 			}
 		} else if (!byteBodyEquals(body, other.body)) {
 			return false;
 		}
-		if (bodyFileName == null) {
-			if (other.bodyFileName != null) {
-				return false;
-			}
-		} else if (!bodyFileName.equals(other.bodyFileName)) {
-			return false;
-		}
-		if (fault != other.fault) {
-			return false;
-		}
-		if (fixedDelayMilliseconds == null) {
-			if (other.fixedDelayMilliseconds != null) {
-				return false;
-			}
-		} else if (!fixedDelayMilliseconds.equals(other.fixedDelayMilliseconds)) {
-			return false;
-		}
-		if (headers == null) {
-			if (other.headers != null) {
-				return false;
-			}
-		} else if (!headers.equals(other.headers)) {
-			return false;
-		}
-		if (proxyBaseUrl == null) {
-			if (other.proxyBaseUrl != null) {
-				return false;
-			}
-		} else if (!proxyBaseUrl.equals(other.proxyBaseUrl)) {
-			return false;
-		}
-		if (status != other.status) {
-			return false;
-		}
-		if (wasConfigured != other.wasConfigured) {
-			return false;
-		}
-		return true;
+        return Objects.equal(bodyFileName, other.bodyFileName)
+                && Objects.equal(bodyTemplate, other.bodyTemplate)
+                && Objects.equal(fault, other.fault)
+                && Objects.equal(fixedDelayMilliseconds, other.fixedDelayMilliseconds)
+                && Objects.equal(headers, other.headers)
+                && Objects.equal(proxyBaseUrl, other.proxyBaseUrl)
+                && Objects.equal(status, other.status)
+                && Objects.equal(wasConfigured, other.wasConfigured);
 	}
 
     private static boolean byteBodyEquals(byte[] expecteds, byte[] actuals)

@@ -15,14 +15,13 @@
  */
 package com.github.tomakehurst.wiremock.http;
 
-import com.github.tomakehurst.wiremock.matching.ValuePattern;
-import com.google.common.base.Predicate;
+import com.github.tomakehurst.wiremock.matching.PatternMatch;
+import com.github.tomakehurst.wiremock.matching.matchers.string.PatternMatcher;
 
 import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Iterables.any;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class HttpHeader {
@@ -82,17 +81,22 @@ public class HttpHeader {
         return values.contains(expectedValue);
     }
 
-    public boolean hasValueMatching(final ValuePattern valuePattern) {
-        return (valuePattern.nullSafeIsAbsent() && !isPresent())
-                || anyValueMatches(valuePattern);
+    public PatternMatch hasValueMatching(PatternMatcher matcher) {
+        if (matcher == PatternMatcher.none() && !isPresent()) {
+            return PatternMatch.matched();
+        } else {
+            return anyValueMatches(matcher);
+        }
     }
 
-    private boolean anyValueMatches(final ValuePattern valuePattern) {
-        return any(values, new Predicate<String>() {
-            public boolean apply(String headerValue) {
-                return valuePattern.isMatchFor(headerValue);
+    private PatternMatch anyValueMatches(PatternMatcher matcher) {
+        for (String value: values) {
+            PatternMatch match = matcher.matches(value);
+            if (match.isMatched()) {
+                return match;
             }
-        });
+        }
+        return PatternMatch.notMatched();
     }
 
     @Override

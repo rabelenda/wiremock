@@ -65,8 +65,8 @@ public class StubMapping {
 	}
 	
 	public ResponseDefinition getResponse() {
-		return response;
-	}
+        return response;
+    }
 	
 	public void setRequest(RequestPattern request) {
 		this.request = request;

@@ -31,5 +31,6 @@ public interface Options {
     FileSource filesRoot();
     Notifier notifier();
     boolean requestJournalDisabled();
+    Integer journalCapacity();
 
 }

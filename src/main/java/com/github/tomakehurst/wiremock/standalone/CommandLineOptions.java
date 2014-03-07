@@ -37,6 +37,7 @@ public class CommandLineOptions implements Options {
 	private static final String VERBOSE = "verbose";
 	private static final String ENABLE_BROWSER_PROXYING = "enable-browser-proxying";
     private static final String DISABLE_REQUEST_JOURNAL = "no-request-journal";
+    private static final String JOURNAL_CAPACITY = "journal-capacity";
 
     private final FileSource fileSource;
 	private final OptionSet optionSet;
@@ -55,6 +56,7 @@ public class CommandLineOptions implements Options {
 		optionParser.accepts(VERBOSE, "Enable verbose logging to stdout");
 		optionParser.accepts(ENABLE_BROWSER_PROXYING, "Allow wiremock to be set as a browser's proxy server");
         optionParser.accepts(DISABLE_REQUEST_JOURNAL, "Disable the request journal (to avoid heap growth when running wiremock for long periods without reset)");
+        optionParser.accepts(JOURNAL_CAPACITY, "Specify the maximum amount of requests maintained in the journal, older are discarded. If not set then journal is unbounded.").withRequiredArg();
 		optionParser.accepts(HELP, "Print this message");
 		
 		optionSet = optionParser.parse(args);
@@ -67,9 +69,22 @@ public class CommandLineOptions implements Options {
             throw new IllegalArgumentException("HTTPS port number must be specified if specifying the keystore path");
         }
 
+        if (recordMappingsEnabled() && (requestJournalDisabled() || Integer.valueOf(0).equals(journalCapacity()))) {
+            throw new IllegalArgumentException("Request journal must be enabled to record stubs");
+        }
+
+        if (!isValidJournalCapacity()) {
+            throw new IllegalArgumentException("Journal capacity, when specified, must be greater or equal to 0");
+        }
+
         if (optionSet.has(RECORD_MAPPINGS) && optionSet.has(DISABLE_REQUEST_JOURNAL)) {
             throw new IllegalArgumentException("Request journal must be enabled to record stubs");
         }
+    }
+
+    private boolean isValidJournalCapacity() {
+        Integer c = journalCapacity();
+        return c == null || c >= 0;
     }
 
     public CommandLineOptions(String... args) {
@@ -168,9 +183,22 @@ public class CommandLineOptions implements Options {
         return new Log4jNotifier();
     }
 
+    private boolean specifiesJournalCapacity() {
+        return optionSet.has(JOURNAL_CAPACITY);
+    }
+
     @Override
     public boolean requestJournalDisabled() {
         return optionSet.has(DISABLE_REQUEST_JOURNAL);
+    }
+
+    @Override
+    public Integer journalCapacity() {
+        if (specifiesJournalCapacity()) {
+            return Integer.valueOf((String) optionSet.valueOf(JOURNAL_CAPACITY));
+        }
+
+        return null;
     }
 
     @Override
@@ -183,6 +211,7 @@ public class CommandLineOptions implements Options {
                         .put("proxyVia", nullToString(proxyVia()))
                         .put("proxyUrl", nullToString(proxyUrl()))
                         .put("recordMappingsEnabled", recordMappingsEnabled())
+                        .put("journalCapacity", nullToString(journalCapacity()) )
                         .build());
     }
 
@@ -193,4 +222,5 @@ public class CommandLineOptions implements Options {
 
         return value.toString();
     }
+
 }

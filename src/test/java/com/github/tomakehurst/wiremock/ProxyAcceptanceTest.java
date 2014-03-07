@@ -16,7 +16,6 @@
 package com.github.tomakehurst.wiremock;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.testsupport.TestHttpHeader;
 import com.github.tomakehurst.wiremock.testsupport.WireMockResponse;
 import org.junit.After;
 import org.junit.Before;

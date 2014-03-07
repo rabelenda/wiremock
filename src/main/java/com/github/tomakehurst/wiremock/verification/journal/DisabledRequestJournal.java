@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Thomas Akehurst
+ * Copyright (C) 2013 Roger Abelenda
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,14 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.tomakehurst.wiremock.verification;
+
+package com.github.tomakehurst.wiremock.verification.journal;
 
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
 
+import java.util.Collections;
 import java.util.List;
 
-public class DisabledRequestJournal implements RequestJournal {
+public class DisabledRequestJournal implements ImmutableCapacityJournal {
 
     @Override
     public int countRequestsMatching(RequestPattern requestPattern) {
@@ -33,10 +37,17 @@ public class DisabledRequestJournal implements RequestJournal {
     }
 
     @Override
-    public void reset() {
-    }
+    public void reset() {}
 
     @Override
-    public void requestReceived(Request request) {
+    public void requestReceived(Request request) {}
+
+    @Override
+    public void load(List<LoggedRequest> loggedRequests) {}
+
+    @Override
+    public List<LoggedRequest> getAllRequests() {
+        return Collections.emptyList();
     }
+
 }

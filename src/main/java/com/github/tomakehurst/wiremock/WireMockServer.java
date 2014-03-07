@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.common.ProxySettings;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.github.tomakehurst.wiremock.core.WireMockApp;
+import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelayControl;
 import com.github.tomakehurst.wiremock.global.ThreadSafeRequestDelayControl;
 import com.github.tomakehurst.wiremock.http.*;
@@ -81,12 +82,16 @@ public class WireMockServer implements Container {
 
         MappingsLoader defaultMappingsLoader = makeDefaultMappingsLoader();
         JsonFileMappingsSaver mappingsSaver = new JsonFileMappingsSaver(fileSource.child(MAPPINGS_ROOT));
+        Integer journalCapacity = options.journalCapacity();
+        if (options.requestJournalDisabled()) {
+            journalCapacity = 0;
+        }
         wireMockApp = new WireMockApp(
                 requestDelayControl,
                 options.browserProxyingEnabled(),
                 defaultMappingsLoader,
                 mappingsSaver,
-                options.requestJournalDisabled(),
+                journalCapacity,
                 this
         );
 
@@ -106,14 +111,17 @@ public class WireMockServer implements Container {
         }
     }
 
-    public WireMockServer(int port, Integer httpsPort, FileSource fileSource, boolean enableBrowserProxying, ProxySettings proxySettings, Notifier notifier) {
+    public WireMockServer(int port, Integer httpsPort, FileSource fileSource,
+                          boolean enableBrowserProxying, ProxySettings proxySettings,
+                          Notifier notifier, Integer journalCapacity) {
         this(wireMockConfig()
                 .port(port)
                 .httpsPort(httpsPort)
                 .fileSource(fileSource)
                 .enableBrowserProxying(enableBrowserProxying)
                 .proxyVia(proxySettings)
-                .notifier(notifier));
+                .notifier(notifier)
+                .journalCapacity(journalCapacity));
     }
 
 	public WireMockServer(int port, FileSource fileSource, boolean enableBrowserProxying, ProxySettings proxySettings) {
@@ -180,6 +188,7 @@ public class WireMockServer implements Container {
             }
 
             addAdminContext();
+            addUiContext();
             addMockServiceContext();
 			jettyServer.start();
 		} catch (Exception e) {
@@ -284,6 +293,20 @@ public class WireMockServer implements Container {
 		jettyServer.addHandler(adminContext);
     }
 
+    private void addUiContext() {
+        Context uiContext = new Context(jettyServer, "/__ui");
+        Map initParams = newHashMap();
+        initParams.put("org.mortbay.jetty.servlet.Default.maxCacheSize", "0");
+        initParams.put("org.mortbay.jetty.servlet.Default.resourceBase", fileSource.child("__ui").getPath());
+        initParams.put("org.mortbay.jetty.servlet.Default.dirAllowed", "false");
+        uiContext.setInitParams(initParams);
+        uiContext.addServlet(DefaultServlet.class, "/*");
+        jettyServer.addHandler(uiContext);
+    }
+
+    public void updateGlobalSettings(GlobalSettings settings) {
+        wireMockApp.updateGlobalSettings(settings);
+    }
 
     private static class NoOpMappingsLoader implements MappingsLoader {
         @Override

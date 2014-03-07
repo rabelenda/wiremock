@@ -28,6 +28,7 @@ import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.github.tomakehurst.wiremock.verification.*;
+import com.github.tomakehurst.wiremock.verification.journal.MutableCapacityJournal;
 
 import java.util.List;
 
@@ -37,7 +38,7 @@ public class WireMockApp implements StubServer, Admin {
     public static final String ADMIN_CONTEXT_ROOT = "/__admin";
 
     private final StubMappings stubMappings;
-    private final RequestJournal requestJournal;
+    private final MutableCapacityJournal requestJournal;
     private final GlobalSettingsHolder globalSettingsHolder;
     private final RequestDelayControl requestDelayControl;
     private final boolean browserProxyingEnabled;
@@ -50,17 +51,26 @@ public class WireMockApp implements StubServer, Admin {
             boolean browserProxyingEnabled,
             MappingsLoader defaultMappingsLoader,
             MappingsSaver mappingsSaver,
-            boolean requestJournalDisabled,
+            Integer journalCapacity,
             Container container) {
         this.requestDelayControl = requestDelayControl;
         this.browserProxyingEnabled = browserProxyingEnabled;
         this.defaultMappingsLoader = defaultMappingsLoader;
         this.mappingsSaver = mappingsSaver;
         globalSettingsHolder = new GlobalSettingsHolder();
+        setupGlobalSettings(journalCapacity);
         stubMappings = new InMemoryStubMappings();
-        requestJournal = requestJournalDisabled ? new DisabledRequestJournal() : new InMemoryRequestJournal();
+        requestJournal = new MutableCapacityJournal(journalCapacity);
         this.container = container;
         loadDefaultMappings();
+    }
+
+    private void setupGlobalSettings(Integer journalCapactiy) {
+        if (journalCapactiy != null) {
+            GlobalSettings settings = new GlobalSettings();
+            settings.setJournalCapacity(journalCapactiy);
+            globalSettingsHolder.replaceWith(settings);
+        }
     }
 
     public GlobalSettingsHolder getGlobalSettingsHolder() {
@@ -104,13 +114,13 @@ public class WireMockApp implements StubServer, Admin {
     @Override
     public void resetMappings() {
         stubMappings.reset();
-        requestJournal.reset();
         requestDelayControl.clearDelay();
+        resetRequestsJournal();
     }
 
     @Override
     public void resetToDefaultMappings() {
-        resetMappings();
+        stubMappings.reset();
         loadDefaultMappings();
     }
 
@@ -139,8 +149,19 @@ public class WireMockApp implements StubServer, Admin {
     }
 
     @Override
+    public void resetRequestsJournal() {
+        requestJournal.reset();
+    }
+
+    @Override
     public void updateGlobalSettings(GlobalSettings newSettings) {
         globalSettingsHolder.replaceWith(newSettings);
+        requestJournal.setCapacity(newSettings.getJournalCapacity());
+    }
+
+    @Override
+    public GlobalSettings getGlobalSettings() {
+        return globalSettingsHolder.get();
     }
 
     @Override
