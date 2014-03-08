@@ -415,7 +415,7 @@ Or
     {
         "request": {
             "method": "GET",
-            "url": "/service\\?param1=([^&]+)&param2=([^&]+)"
+            "urlPattern": "/service\\?param1=([^&]+)&param2=([^&]+)"
         },
         "response": {
             "status": 200,
