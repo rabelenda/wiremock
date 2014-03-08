@@ -19,12 +19,21 @@ angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope,
   $scope.refresh = function() {
     startRequest();
     $http.get('/__admin/').success(function(data) {
-      $scope.mappings = data.mappings;
+      $scope.mappings = prettyMappings(data.mappings);
       endRequest();
     }). error(function(data, status) {
       failedRequest(data, status);
     });
   };
 
+  function prettyMappings(mappings) {
+    var ret = [];
+    for (var i=0, len=mappings.length; i<len; i++) {
+        ret.push(angular.toJson(mappings[i],true));
+    }
+    return ret;
+  }
+
   $scope.refresh();
+
 });

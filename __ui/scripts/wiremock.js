@@ -1,4 +1,5 @@
-angular.module('wiremock', ['ngRoute','$strap.directives','wmEnter','wmRequests','wmMappings','wmSettings']).
+angular.module('wiremock', ['ngRoute','$strap.directives','wmEnter','wmHighlight','wmRequests',
+'wmMappings','wmSettings']).
   config(function($routeProvider) {
     $routeProvider.
       when('/requests', {controller: 'RequestListCtrl', templateUrl:'views/requestList.html'}).

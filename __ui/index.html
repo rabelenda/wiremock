@@ -16,7 +16,7 @@
   -->
 
 <html ng-app="wiremock">
-  <head>
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,98 +29,108 @@
     <script src="scripts/vendor/angular/angular-route.min.js"></script>
     <script src="scripts/vendor/angular-strap-navbar.js"></script>
     <script src="scripts/vendor/jquery-1.10.2.min.js"></script>
-    
+
+    <link rel="stylesheet" href="styles/rainbow.css"/>
+    <script src="scripts/vendor/highlight.pack.js"></script>
+
     <script src="scripts/directives/wm-enter.js"></script>
+    <script src="scripts/directives/wm-highlight.js"></script>
 
     <script src="scripts/controllers/wm-requests.js"></script>
     <script src="scripts/controllers/wm-mappings.js"></script>
     <script src="scripts/controllers/wm-settings.js"></script>
-    
+
     <script src="scripts/wiremock.js"></script>
-    
+
     <!-- required to avoid logging the favicon request in wiremock -->
     <script src="scripts/util/favicon.js"></script>
-    <link rel="shortcut icon" href="#">
+    <link rel="shortcut icon" href="#"/>
 
-    <link rel="stylesheet" href="styles/bootstrap.min.css">
-    
+    <link rel="stylesheet" href="styles/bootstrap.min.css"/>
+
 
     <!-- Just for debugging purposes. Don't actually copy this line! -->
-    <!--[if lt IE 9]><script src="../../docs-assets/js/ie8-responsive-file-warning.js"></script><![endif]-->
+    <!--[if lt IE 9]>
+    <script src="../../docs-assets/js/ie8-responsive-file-warning.js"/><![endif]-->
 
     <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"/>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"/>
     <![endif]-->
     <style>
-      body {
+        body {
         padding-top: 50px;
-      }
-      .nested-page {
+        }
+        .nested-page {
         padding-top: 5px;
-      }
-      .nested-page div {
+        }
+        .nested-page div {
         padding: 5px;
-      }
-      [touch-action="none"] {
+        }
+        [touch-action="none"] {
         -ms-touch-action: none;
         touch-action: none;
-      }
+        }
 
-      [touch-action="pan-x"] {
+        [touch-action="pan-x"] {
         -ms-touch-action: pan-x;
         touch-action: pan-x;
-      }
+        }
 
-      [touch-action="pan-y"] {
+        [touch-action="pan-y"] {
         -ms-touch-action: pan-y;
         touch-action: pan-y;
-      }
+        }
 
-      [touch-action="scroll"],[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"] {
+        [touch-action="scroll"],[touch-action="pan-x pan-y"],[touch-action="pan-y pan-x"] {
         -ms-touch-action: pan-x pan-y;
         touch-action: pan-x pan-y;
-      }
+        }
     </style>
-  </head>
-  <body class="container">
-    <div class="navbar navbar-inverse navbar-fixed-top" role="navigation" bs-navbar>
-      <div class="container">
+</head>
+<body class="container">
+<div class="navbar navbar-inverse navbar-fixed-top" role="navigation" bs-navbar>
+    <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">WireMock</a>
+            <button type="button" class="navbar-toggle" data-toggle="collapse"
+                    data-target=".navbar-collapse">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">WireMock</a>
         </div>
         <div class="collapse navbar-collapse">
-          <ul class="nav navbar-nav">
-            <li data-match-route="/requests">
-              <a href="#/requests"><span class="glyphicon glyphicon-inbox"></span> Requests</a>
-            </li>
-            <li data-match-route="/mappings">
-              <a href="#/mappings"><span class="glyphicon glyphicon-edit"></span> Mappings</a>
-            </li>
-            <li data-match-route="/files">
-              <a href="#/files"><span class="glyphicon glyphicon-folder-open"></span> Files</a>
-            </li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right">
-            <li data-match-route="/settings">
-              <a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a>
-            </li>
-            <li>
-              <a href="https://github.com/rabelenda/wiremock/tree/master/docs/source" target="_blank"><span class="glyphicon glyphicon-book"></span> Docs</a>
-            </li>
-          </ul>
-        </div><!--/.nav-collapse -->
-      </div>
+            <ul class="nav navbar-nav">
+                <li data-match-route="/requests">
+                    <a href="#/requests"><span class="glyphicon glyphicon-inbox"></span>
+                        Requests</a>
+                </li>
+                <li data-match-route="/mappings">
+                    <a href="#/mappings"><span class="glyphicon glyphicon-edit"></span> Mappings</a>
+                </li>
+                <li data-match-route="/files">
+                    <a href="#/files"><span class="glyphicon glyphicon-folder-open"></span>
+                        Files</a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li data-match-route="/settings">
+                    <a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a>
+                </li>
+                <li>
+                    <a href="https://github.com/rabelenda/wiremock/tree/master/docs/source"
+                       target="_blank"><span class="glyphicon glyphicon-book"></span> Docs</a>
+                </li>
+            </ul>
+        </div>
+        <!--/.nav-collapse -->
     </div>
+</div>
 
-    <div class="container nested-page" ng-view>
-    </div>
-  </body>
+<div class="container nested-page" ng-view>
+</div>
+</body>
 </html>
