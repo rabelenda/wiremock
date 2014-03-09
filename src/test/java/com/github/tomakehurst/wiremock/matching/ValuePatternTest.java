@@ -235,6 +235,12 @@ public class ValuePatternTest {
     }
 
     @Test
+    public void doesNotMatchOnIsEqualToJsonWithDifferentJson() {
+        valuePattern.setEqualToJson("{\"x\":0}");
+        assertFalse(valuePattern.isMatchFor("{\"x\":1}").isMatched());
+    }
+
+    @Test
     public void emptyGroupsOnIsEqualToJsonWithDifferentJson() {
         valuePattern.setEqualToJson("{\"x\":0}");
         assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("{\"x\":1}").getGroups());
@@ -253,7 +259,7 @@ public class ValuePatternTest {
     }
 
     @Test
-    public void permitsExtraFieldsWhenJsonCompareModeIsLENIENT() {
+    public void matchesOnIsEqualToJsonWithLenientJsonCompareModeAndExtraFieldsInJson() {
         valuePattern.setEqualToJson("{ \"x\": 0 }");
         valuePattern.setJsonCompareMode(JSONCompareMode.LENIENT);
         assertTrue(valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }").isMatched());
@@ -263,6 +269,45 @@ public class ValuePatternTest {
     public void doesNotMatchOnEqualToJsonWhenFieldMissing() {
         valuePattern.setEqualToJson("{ \"x\": 0 }");
         assertFalse(valuePattern.isMatchFor("{ \"x\": 0, \"y\": 1 }").isMatched());
+    }
+
+    @Test
+    public void matchesOnIsEqualToXmlWithSameXml() {
+        valuePattern.setEqualToXml("<H><J>111</J></H>");
+        assertTrue(valuePattern.isMatchFor("<H><J>111</J></H>\n").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnIsEqualToXmlWithSameXml() {
+        valuePattern.setEqualToXml("<H><J>111</J></H>");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("<H><J>111</J></H>\n")
+                .getGroups());
+    }
+
+    @Test
+    public void doesNotMatchesOnIsEqualToXmlWithDifferentXml() {
+        valuePattern.setEqualToXml("<H><J>111</J></H>");
+        assertFalse(valuePattern.isMatchFor("<H><J>112</J></H>\n").isMatched());
+    }
+
+    @Test
+    public void emptyGroupsOnIsEqualToXmlWithDifferentXml() {
+        valuePattern.setEqualToXml("<H><J>111</J></H>");
+        assertEquals(MatchedGroups.noGroups(), valuePattern.isMatchFor("<H><J>112</J></H>\n")
+                .getGroups());
+    }
+
+    @Test
+    public void matchesOnIsEqualToXmlWithDifferentSubElementOrder() {
+        valuePattern.setEqualToXml("<H><J>111</J><X>222</X></H>");
+        assertTrue(valuePattern.isMatchFor("<H><X>222</X><J>111</J></H>\n").isMatched());
+    }
+
+    @Test
+    public void matchesOnIsEqualToXmlWithDifferentAttributeOrder() {
+        valuePattern.setEqualToXml("<thing attr1=\"one\" attr2=\"two\" attr3=\"three\" />");
+        assertTrue(valuePattern.isMatchFor("<thing attr3=\"three\" attr1=\"one\" attr2=\"two\"  " +
+                "/>").isMatched());
     }
 
     @Test

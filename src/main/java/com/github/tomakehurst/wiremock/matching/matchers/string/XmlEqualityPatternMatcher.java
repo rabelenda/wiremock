@@ -13,39 +13,46 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ *
+ */
 package com.github.tomakehurst.wiremock.matching.matchers.string;
 
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
-import com.google.common.base.Objects;
-import org.json.JSONException;
-import org.skyscreamer.jsonassert.JSONCompareMode;
-import org.skyscreamer.jsonassert.JSONCompareResult;
+import org.custommonkey.xmlunit.Diff;
+import org.custommonkey.xmlunit.XMLUnit;
+import org.xml.sax.SAXException;
 
-import static org.skyscreamer.jsonassert.JSONCompare.compareJSON;
+import java.io.IOException;
 
-class JsonEqualityPatternMatcher extends PatternMatcher {
+public class XmlEqualityPatternMatcher extends PatternMatcher {
+
+    static {
+        XMLUnit.setIgnoreWhitespace(true);
+    }
 
     private final String value;
-    private final JSONCompareMode compareMode;
 
-    public JsonEqualityPatternMatcher(String value, JSONCompareMode compareMode) {
-       this.value = value;
-       this.compareMode = Objects.firstNonNull(compareMode, JSONCompareMode.NON_EXTENSIBLE);
+    public XmlEqualityPatternMatcher(String value) {
+        this.value = value;
     }
 
     @Override
     public PatternMatch matches(String str) {
         try {
-            JSONCompareResult result = compareJSON(value, str, compareMode);
-            return PatternMatch.fromMatched(result.passed());
-        } catch (JSONException e) {
+            Diff diff = XMLUnit.compareXML(value, str);
+            return PatternMatch.fromMatched(diff.similar());
+        } catch (SAXException e) {
+            return PatternMatch.notMatched();
+        } catch (IOException e) {
             return PatternMatch.notMatched();
         }
     }
 
     @Override
     public String toString() {
-        return "equal to JSON " + value + " with mode " + compareMode;
+        return "equal to XML " + value;
     }
 
 }

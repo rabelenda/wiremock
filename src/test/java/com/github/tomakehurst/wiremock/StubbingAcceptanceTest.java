@@ -270,6 +270,16 @@ public class StubbingAcceptanceTest extends AcceptanceTestBase {
         assertThat(mapping2.getResponse().getBody(), is("One"));
     }
 
+    @Test
+    public void stubbingPatch() {
+        stubFor(patch(urlEqualTo("/a/registered/resource")).withRequestBody(equalTo("some body"))
+                .willReturn(aResponse().withStatus(204)));
+
+        WireMockResponse response = testClient.patchWithBody("/a/registered/resource", "some body", "text/plain");
+
+        assertThat(response.statusCode(), is(204));
+    }
+
 	private void getAndAssertUnderlyingExceptionInstanceClass(String url, Class<?> expectedClass) {
 		boolean thrown = false;
 		try {

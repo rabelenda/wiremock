@@ -31,7 +31,8 @@
   </tr>
   </thead>
   <tbody>
-  <tr ng-repeat="mapping in mappings">
+  <!-- track by $index is a workaround to avoid an error when there are duplicates -->
+  <tr ng-repeat="mapping in mappings track by $index">
     <td class="col-md-12">
         <pre wm-highlight><code>{{mapping}}</code></pre>
     </td>

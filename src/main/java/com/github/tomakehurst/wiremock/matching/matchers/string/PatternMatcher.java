@@ -47,6 +47,10 @@ public abstract class PatternMatcher {
         return new JsonEqualityPatternMatcher(value, compareMode);
     }
 
+    public static PatternMatcher equalsToXml(String equalToXml) {
+        return new XmlEqualityPatternMatcher(equalToXml);
+    }
+
     /**
      * @return the short circuit match. Groups are concatenated when matches.
      */
@@ -68,4 +72,5 @@ public abstract class PatternMatcher {
     public static PatternMatcher jsonPath(String jsonPath) {
         return new JsonPathPatternMatcher(jsonPath);
     }
+
 }

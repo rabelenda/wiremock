@@ -161,6 +161,12 @@ public class WireMock {
         return valueMatchingStrategy;
     }
 
+    public static ValueMatchingStrategy equalToXml(String value) {
+        ValueMatchingStrategy headerStrategy = new ValueMatchingStrategy();
+        headerStrategy.setEqualToXml(value);
+        return headerStrategy;
+    }
+
 	public static ValueMatchingStrategy containing(String value) {
 		ValueMatchingStrategy headerStrategy = new ValueMatchingStrategy();
 		headerStrategy.setContains(value);
@@ -277,6 +283,10 @@ public class WireMock {
 	
 	public static RequestPatternBuilder deleteRequestedFor(UrlMatchingStrategy urlMatchingStrategy) {
 		return new RequestPatternBuilder(RequestMethod.DELETE, urlMatchingStrategy);
+	}
+
+	public static RequestPatternBuilder patchRequestedFor(UrlMatchingStrategy urlMatchingStrategy) {
+		return new RequestPatternBuilder(RequestMethod.PATCH, urlMatchingStrategy);
 	}
 	
 	public static RequestPatternBuilder headRequestedFor(UrlMatchingStrategy urlMatchingStrategy) {

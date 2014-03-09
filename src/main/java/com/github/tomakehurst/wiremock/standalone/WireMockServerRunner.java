@@ -18,7 +18,6 @@ package com.github.tomakehurst.wiremock.standalone;
 import com.github.tomakehurst.wiremock.Log4jConfiguration;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.FileSource;
-import com.github.tomakehurst.wiremock.common.SingleRootFileSource;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -33,14 +32,15 @@ public class WireMockServerRunner {
 
 	private WireMockServer wireMockServer;
 	
-	public void run(FileSource fileSource, String... args) {
-		CommandLineOptions options = new CommandLineOptions(fileSource, args);
+	public void run(String... args) {
+		CommandLineOptions options = new CommandLineOptions(args);
 		if (options.help()) {
 			out.println(options.helpText());
 			return;
 		}
         Log4jConfiguration.configureLogging(options.verboseLoggingEnabled());
-		
+
+		FileSource fileSource = options.filesRoot();
 		fileSource.createIfNecessary();
 		FileSource filesFileSource = fileSource.child(FILES_ROOT);
 		filesFileSource.createIfNecessary();
@@ -68,7 +68,10 @@ public class WireMockServerRunner {
 				requestPattern.setUrlPattern(".*");
 				ResponseDefinition responseDef = new ResponseDefinition();
 				responseDef.setProxyBaseUrl(baseUrl);
-				stubMappings.addMapping(new StubMapping(requestPattern, responseDef));
+
+				StubMapping proxyBasedMapping = new StubMapping(requestPattern, responseDef);
+				proxyBasedMapping.setPriority(10); // Make it low priority so that existing stubs will take precedence
+				stubMappings.addMapping(proxyBasedMapping);
 			}
 		});
 	}
@@ -82,6 +85,6 @@ public class WireMockServerRunner {
     }
 
 	public static void main(String... args) {
-		new WireMockServerRunner().run(new SingleRootFileSource("."), args);
+		new WireMockServerRunner().run(args);
 	}
 }

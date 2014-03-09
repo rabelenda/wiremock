@@ -26,6 +26,7 @@ import org.skyscreamer.jsonassert.JSONCompareMode;
 public class ValuePattern {
 
     private String equalToJson;
+    private String equalToXml;
     private JSONCompareMode jsonCompareMode;
 	private String equalTo;
 	private String contains;
@@ -47,6 +48,8 @@ public class ValuePattern {
             }
         } else if (equalToJson != null) {
             matcher = PatternMatcher.equalsToJson(equalToJson, jsonCompareMode);
+        } else if (equalToXml != null) {
+            matcher = PatternMatcher.equalsToXml(equalToXml);
         } else if (equalTo != null) {
             matcher = PatternMatcher.equalsTo(equalTo);
         } else if (contains != null) {
@@ -69,7 +72,7 @@ public class ValuePattern {
     }
 
     private int countAllAttributes() {
-        return count(equalToJson, equalTo, contains, matches, doesNotMatch, absent,
+        return count(equalToJson, equalToXml, equalTo, contains, matches, doesNotMatch, absent,
                 matchesJsonPaths);
     }
 
@@ -93,6 +96,12 @@ public class ValuePattern {
     public static ValuePattern equalToJson(String value) {
         ValuePattern valuePattern = new ValuePattern();
         valuePattern.setEqualToJson(value);
+        return valuePattern;
+    }
+
+    public static ValuePattern equalToXml(String value) {
+        ValuePattern valuePattern = new ValuePattern();
+        valuePattern.setEqualToXml(value);
         return valuePattern;
     }
 
@@ -125,7 +134,7 @@ public class ValuePattern {
 		checkOneMatchTypeSpecified();
         return matcher.matches(value);
     }
-
+	
     private void checkOneMatchTypeSpecified() {
         if (countAllAttributes() == 0) {
             throw new IllegalStateException("One match type must be specified");
@@ -139,6 +148,11 @@ public class ValuePattern {
 	
     public void setEqualToJson(String equalToJson) {
         this.equalToJson = equalToJson;
+        initMatcher();
+    }
+    
+    public void setEqualToXml(String equalToXml) {
+        this.equalToXml = equalToXml;
         initMatcher();
     }
     
@@ -180,6 +194,10 @@ public class ValuePattern {
         return equalToJson;
     }
 
+    public String getEqualToXml() {
+        return equalToXml;
+    }
+
     public JSONCompareMode getJsonCompareMode() {
         return jsonCompareMode;
     }
@@ -215,8 +233,8 @@ public class ValuePattern {
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(absent, contains, doesNotMatch, equalTo, equalToJson, matches,
-                matchesJsonPaths);
+        return Objects.hashCode(absent, contains, doesNotMatch, equalTo, equalToJson, 
+                equalToXml, matches, matchesJsonPaths);
     }
 
     @Override
@@ -236,6 +254,7 @@ public class ValuePattern {
                 && Objects.equal(doesNotMatch, other.doesNotMatch)
                 && Objects.equal(equalTo, other.equalTo)
                 && Objects.equal(equalToJson, other.equalToJson)
+                && Objects.equal(equalToXml, other.equalToXml)
                 && Objects.equal(matches, other.matches)
                 && Objects.equal(matchesJsonPaths, other.matchesJsonPaths);
     }

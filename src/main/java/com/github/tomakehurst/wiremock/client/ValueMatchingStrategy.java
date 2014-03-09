@@ -19,12 +19,11 @@ import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import com.google.common.base.Function;
 import org.skyscreamer.jsonassert.JSONCompareMode;
 
-import java.util.List;
-
 public class ValueMatchingStrategy {
 
 	private String equalTo;
 	private String equalToJson;
+	private String equalToXml;
     private JSONCompareMode jsonCompareMode;
     private String matches;
     private String doesNotMatch;
@@ -35,6 +34,7 @@ public class ValueMatchingStrategy {
 		ValuePattern pattern = new ValuePattern();
 		pattern.setEqualTo(equalTo);
 		pattern.setEqualToJson(equalToJson);
+		pattern.setEqualToXml(equalToXml);
         pattern.setJsonCompareMode(jsonCompareMode);
 		pattern.setMatches(matches);
 		pattern.setDoesNotMatch(doesNotMatch);
@@ -67,6 +67,14 @@ public class ValueMatchingStrategy {
 
     public void setJsonCompareMode(JSONCompareMode jsonCompareMode) {
         this.jsonCompareMode = jsonCompareMode;
+    }
+
+    public String getEqualToXml() {
+        return equalToXml;
+    }
+
+    public void setEqualToXml(String equalToXml) {
+        this.equalToXml = equalToXml;
     }
 
 	public String getEqualTo() {
