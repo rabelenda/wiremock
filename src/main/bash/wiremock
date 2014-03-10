@@ -2,10 +2,11 @@
 # Script to control wiremock
 
 WIREMOCK_VERSION="1.44"
-WIREMOCK_JAR="wiremock-$WIREMOCK_VERSION-standalone.jar"
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+WIREMOCK_JAR="$DIR/wiremock-$WIREMOCK_VERSION-standalone.jar"
 SCRIPT_NAME=`basename $0`
 PID_FILE="/var/run/$SCRIPT_NAME.pid"
-MAX_STOP_TIME=10
+MAX_STOP_TIME_IN_SECS="10"
 DEFAULT_PORT="8088"
 DEFAULT_JOURNAL_CAPACITY="1000"
 DEFAULT_REQUEST_URL="/.*"
@@ -28,16 +29,11 @@ COMMANDS:
     kill                kills wiremock instance
     status              shows wiremock status
     reload              reloads mappings and resets log
-    list                lists logged requests 
 
 START OPTIONS:
     -p PORT         Port used by wiremock (Default: $DEFAULT_PORT)
     -j CAPACITY     Journal capacity (Default: $DEFAULT_JOURNAL_CAPACITY)
     -v              Verbose
-
-LIST OPTIONS:
-    -u URL_PATTERN  Request URL pattern (Default: $DEFAULT_REQUEST_URL)
-    -m METHOD       Request method (Default: $DEFAULT_REQUEST_METHOD)
 
 EOF
 }
@@ -130,13 +126,14 @@ stop() {
   
     echo "Stopping $SCRIPT_NAME..."
     kill $PID || return 1
-    for ((i=0; $i<$MAX_STOP_TIME*10; $i++))
+    local CHECKS_BY_SEC=2;
+    for ((i=0; $i<$MAX_STOP_TIME_IN_SECS*$CHECKS_BY_SEC; i++))
     do
         if [ $(isRunning) == 0 ]; then
             echo "$SCRIPT_NAME stopped."
             return 0
         fi
-        sleep 0.1
+        sleep $(bc <<< "scale = 2; 1 / $CHECKS_BY_SEC")
     done
     echo -e "\n$SCRIPT_NAME did not terminate within $MAX_STOP_TIME seconds, the pid is $PID"
     return 0
@@ -164,38 +161,6 @@ reload() {
     curl -X POST http://localhost:$RUN_PORT/__admin/mappings/reset && echo "Reloaded $SCRIPT_NAME."
 }
 
-parseQueryParams() {
-    while getopts "u:" OPTION
-    do
-        case $OPTION in
-            u)
-                REQUEST_URL=$OPTARG
-                ;;
-            m)
-                REQUEST_METHOD=$OPTARG
-                ;;
-            ?)
-                usage
-                exit
-                ;;
-        esac
-    done
-    shift $(($OPTIND - 1))
-    noMoreParams "$@"
-}
-
-list() {
-    parseQueryParams "$@"
-    preIsRunning
-    curl -X POST -d "{\"urlPattern\": \"$REQUEST_URL\", \"method\" :\"$REQUEST_METHOD\"}" http://localhost:$RUN_PORT/__admin/requests/find
-}
-
-count() {
-    parseQueryParams "$@"
-    preIsRunning
-    curl -X POST -d "{\"urlPattern\": \"$REQUEST_URL\", \"method\" :\"$REQUEST_METHOD\"}" http://localhost:$RUN_PORT/__admin/requests/count
-}
-
 run() {
     local COMMAND=$1
     shift
@@ -215,12 +180,6 @@ run() {
             ;;
         reload)
             reload "$@"
-            ;;
-        list)
-            list "$@"
-            ;;
-        count)
-            count "$@"
             ;;
         *)
             echo "Invalid command: $COMMAND"
