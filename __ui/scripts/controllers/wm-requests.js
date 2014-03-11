@@ -2,12 +2,12 @@ angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   
-  function search(query) {
-    $scope.filteredRequests = $filter("filter")($scope.requests, query);
+  $scope.search= function() {
+    $scope.filteredRequests = $filter("filter")($scope.requests, $scope.query);
   }
 
-  // uncomment to search on every key hit 
-  // $scope.$watch("search", search);
+  // uncomment to search on every key hit
+  // $scope.$watch("query", $scope.search);
 
   function startRequest() {
     $scope.loading++;
@@ -66,7 +66,7 @@ angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function
     $http.post('/__admin/requests/find', query).success(function(data) {
       $scope.requests = data.requests;
       $scope.updateHttpRequests();
-      search($scope.search);
+      $scope.search();
       endRequest();
     }). error(function(data, status) {
       failedRequest(data, status);

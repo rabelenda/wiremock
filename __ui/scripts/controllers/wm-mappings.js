@@ -2,10 +2,10 @@ angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope,
   $scope.loading = 0;
 
   // uncomment to search on every key hit
-  // $scope.$watch("search", search);
+  // $scope.$watch("query", $scope.search);
 
-  function search(query) {
-    $scope.filteredMappings = $filter("filter")($scope.mappings, query);
+  $scope.search= function() {
+    $scope.filteredMappings = $filter("filter")($scope.mappings, $scope.query);
   }
 
   function startRequest() {
@@ -39,7 +39,7 @@ angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope,
     startRequest();
     $http.get('/__admin/').success(function(data) {
       $scope.mappings = getWithPrettyJsonAndId(data.mappings);
-      search($scope.search);
+      $scope.search();
       endRequest();
     }). error(function(data, status) {
       failedRequest(data, status);
