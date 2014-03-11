@@ -74,15 +74,6 @@ angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestLis
     });
   };
 
-  $scope.reload = function() {
-    startRequest();
-    $http.post('/__admin/mappings/reset').success(function(data) {
-      endRequest();
-    }). error(function(data, status) {
-      failedRequest(data, status);
-    });
-  };
-    
   $scope.open = function ($url, $body) {
     var modalInstance = $modal.open({
       templateUrl: 'modal.html',
