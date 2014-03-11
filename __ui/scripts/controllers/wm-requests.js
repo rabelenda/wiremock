@@ -1,4 +1,4 @@
-angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestListCtrl', function ($scope, $http, $filter, $modal) {
+angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
   
@@ -35,16 +35,28 @@ angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestLis
     }
   }
 
-  $scope.decodeBodies = function() {
+  function getHttpRequest(req, body) {
+    var ret = req.method + " " + req.url + " HTTP/1.1\n";
+    for (var header in req.headers) {
+      ret += header + ": " + req.headers[header] + "\n";
+    }
+    ret += "\n" + body;
+    return ret;
+  }
+
+  $scope.updateHttpRequests= function() {
     var reqs = $scope.requests;
-    for (var i=0,len=reqs.length; i<len; i++) {
+    for (var i=0, len=reqs.length; i<len; i++) {
+      //need to add id to avoid issues with duplicate mappings
+      var decodedBody;
       try {
-        reqs[i].decodedBody = decode(reqs[i].body, $scope.bodyDecoding);
+        decodedBody = decode(reqs[i].body, $scope.bodyDecoding);
         reqs[i].failedDecoding = false;
       } catch (err) {
-        reqs[i].decodedBody = reqs[i].body;
+        decodedBody = reqs[i].body;
         reqs[i].failedDecoding = true;
       }
+      reqs[i].httpRequest = getHttpRequest(reqs[i], decodedBody);
     }
   }
 
@@ -53,7 +65,7 @@ angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestLis
     var query = { "urlPattern" : "/.*", "method" : "ANY" };
     $http.post('/__admin/requests/find', query).success(function(data) {
       $scope.requests = data.requests;
-      $scope.decodeBodies();
+      $scope.updateHttpRequests();
       search($scope.search);
       endRequest();
     }). error(function(data, status) {
@@ -74,35 +86,4 @@ angular.module('wmRequests', ['wmEnter', 'ui.bootstrap']).controller('RequestLis
     });
   };
 
-  $scope.open = function ($url, $body) {
-    var modalInstance = $modal.open({
-      templateUrl: 'modal.html',
-      controller: ModalInstanceCtrl,
-      resolve: {
-        url: function () {
-          return $url;
-        },
-        body: function () {
-          return $body;
-        },
-      }
-    });
-  };
-})
-.filter('substring', function() {
-	return function(str, start, end) {
-		return str.substring(start, end);
-	};
 });
-
-
-var ModalInstanceCtrl = function ($scope, $modalInstance, url, body) {
-
-  $scope.url = url;
-  $scope.body = body;
-
-  $scope.ok = function () {
-    $modalInstance.close();
-  };
-
-};

@@ -34,11 +34,9 @@
 <table class="table table-striped table-hover">
   <thead>
   <tr>
-    <th>URL</th>
-    <th>Date</th>
     <th>
-      <span style="vertical-align: bottom;">Body</span>
-      <select ng-model="bodyDecoding" ng-change="decodeBodies()" style="height: auto; width: auto; margin-bottom: 0px">
+      <span style="vertical-align: bottom;">HTTP Request</span>
+      <select ng-model="bodyDecoding" ng-change="updateHttpRequest()" style="height: auto; width: auto; margin-bottom: 0px">
         <option value="raw">Raw</option>
         <option value="latin">Latin</option>
         <option value="utf8">UTF-8</option>
@@ -47,28 +45,15 @@
   </tr>
   </thead>
   <tbody>
-  <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true" ng-dblclick="open(request.url, request.decodedBody)">
-    <td class="col-md-3">{{request.url | substring:0:35}}</a></td>
-    <td class="col-md-2">{{request.loggedDateString  | date:'yyyy-MM-dd HH:mm:ss'}}</td>
-    <td class="col-md-4">
+  <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true">
+    <td class="col-md-12">
+      <span>{{request.loggedDateString  | date:'yyyy-MM-dd HH:mm:ss'}}</span>
       <div class="alert alert-error" ng-show="request.failedDecoding">
         <strong>Error!</strong> Problem decoding the body, you can try with other charset.
       </div>
-      <span>{{request.decodedBody | substring:0:85}}</span>
+      <pre wm-highlight><code>{{request.httpRequest}}</code></pre>
     </td>
   </tr>
   </tbody>
 </table>
 </div>
-
-<script type="text/ng-template" id="modal.html">
-	<div class="modal-header">
-		<div style="word-wrap: break-word;"><h4>{{ url }}</h4></div>
-	</div>
-	<div class="modal-body">
-		<div style="word-wrap: break-word;">{{ body }}</div><br>
-	</div>
-	<div class="modal-footer">
-		<button class="btn btn-primary" ng-click="ok()">OK</button>
-	</div>
-</script>

@@ -26,8 +26,11 @@ angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope,
   function getWithPrettyJsonAndId(mappings) {
     var ret = [];
     for (var i=0, len=mappings.length; i<len; i++) {
-        //need to add id to avoid issues with duplicate mappings
-        ret.push({"id": i, "json": angular.toJson(mappings[i],true)});
+      //need to add id to avoid issues with duplicate mappings
+      ret.push({
+        "id": i,
+        "json": angular.toJson(mappings[i],true)
+      });
     }
     return ret;
   }
