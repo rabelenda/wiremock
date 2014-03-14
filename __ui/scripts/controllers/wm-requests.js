@@ -1,6 +1,12 @@
-angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function ($scope, $http, $filter) {
+angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope, $http, $filter) {
   $scope.bodyDecoding = "raw";
   $scope.loading = 0;
+  $scope.showHeaders = true;
+  $scope.decodings = [
+    {"value":"raw","label":"Raw"},
+    {"value":"latin","label":"Latin"},
+    {"value":"utf8","label":"UTF-8"}
+  ]
   
   $scope.search= function() {
     $scope.filteredRequests = $filter("filter")($scope.requests, $scope.query);
@@ -35,28 +41,51 @@ angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function
     }
   }
 
-  function getHttpRequest(req, body) {
-    var ret = req.method + " " + req.url + " HTTP/1.1\n";
-    for (var header in req.headers) {
-      ret += header + ": " + req.headers[header] + "\n";
+  $scope.updateDecodedBody= function(request) {
+    try {
+      request.decodedBody = decode(request.body, $scope.bodyDecoding);
+      request.failedDecoding = false;
+    } catch (err) {
+      request.decodedBody = request.body;
+      request.failedDecoding = true;
     }
-    ret += "\n" + body;
+  }
+
+  function getHttpRequest(req, showHeaders) {
+    var ret = req.method + " " + req.url + " HTTP/1.1\n";
+    if (showHeaders) {
+      for (var header in req.headers) {
+        ret += header + ": " + req.headers[header] + "\n";
+      }
+    }
+    ret += "\n" + req.body;
     return ret;
   }
 
-  $scope.updateHttpRequests= function() {
-    var reqs = $scope.requests;
+  $scope.updateHttpRequest= function(request) {
+    request.httpRequest = getHttpRequest(request, $scope.showHeaders);
+  }
+
+  $scope.updatedDecoding= function() {
+    var reqs = $scope.requests
     for (var i=0, len=reqs.length; i<len; i++) {
-      //need to add id to avoid issues with duplicate mappings
-      var decodedBody;
-      try {
-        decodedBody = decode(reqs[i].body, $scope.bodyDecoding);
-        reqs[i].failedDecoding = false;
-      } catch (err) {
-        decodedBody = reqs[i].body;
-        reqs[i].failedDecoding = true;
-      }
-      reqs[i].httpRequest = getHttpRequest(reqs[i], decodedBody);
+      $scope.updateDecodedBody(reqs[i]);
+      $scope.updateHttpRequest(reqs[i]);
+    }
+  }
+
+  $scope.updatedShowHeaders= function() {
+    var reqs = $scope.requests
+    for (var i=0, len=reqs.length; i<len; i++) {
+      $scope.updateHttpRequest(reqs[i]);
+    }
+  }
+
+  $scope.getDecodedHttpHeader= function() {
+    var reqs = $scope.requests
+    for (var i=0, len=reqs.length; i<len; i++) {
+
+      reqs[i].httpRequest = getHttpRequest(request, $scope.showHeaders);
     }
   }
 
@@ -65,7 +94,7 @@ angular.module('wmRequests', ['wmEnter']).controller('RequestListCtrl', function
     var query = { "urlPattern" : "/.*", "method" : "ANY" };
     $http.post('/__admin/requests/find', query).success(function(data) {
       $scope.requests = data.requests;
-      $scope.updateHttpRequests();
+      $scope.updatedDecoding();
       $scope.search();
       endRequest();
     }). error(function(data, status) {

@@ -1,4 +1,4 @@
-angular.module('wiremock', ['ngRoute','mgcrea.ngStrap','wmEnter','wmHighlight','wmRequests',
+angular.module('wiremock', ['ngRoute','mgcrea.ngStrap','labsEnter','hljs','wmRequests',
 'wmMappings','wmSettings']).
   config(function($routeProvider) {
     $routeProvider.
