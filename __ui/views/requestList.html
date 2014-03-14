@@ -47,7 +47,8 @@
   <tbody>
   <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true">
     <td class="col-md-12">
-      <span>{{request.loggedDateString  | date:'yyyy-MM-dd HH:mm:ss'}}</span>
+      <span class="glyphicon glyphicon-time"></span><span> {{request.loggedDateString
+        | date:'yyyy-MM-dd HH:mm:ss'}}</span>
       <div class="alert alert-error" ng-show="request.failedDecoding">
         <strong>Error!</strong> Problem decoding the body, you can try with other charset.
       </div>

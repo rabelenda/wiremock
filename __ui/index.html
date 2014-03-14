@@ -109,24 +109,29 @@
         <div class="collapse navbar-collapse">
             <ul class="nav navbar-nav">
                 <li data-match-route="/requests">
-                    <a href="#/requests"><span class="glyphicon glyphicon-inbox"></span>
-                        Requests</a>
+                    <a href="#/requests"
+                       title="Requests received by WireMock kept in memory"><span
+                            class="glyphicon glyphicon-inbox"></span> Requests</a>
                 </li>
                 <li data-match-route="/mappings">
-                    <a href="#/mappings"><span class="glyphicon glyphicon-edit"></span> Mappings</a>
+                    <a href="#/mappings"
+                       title="Mappings used to configure WireMock"><span
+                            class="glyphicon glyphicon-edit"></span> Mappings</a>
                 </li>
                 <li data-match-route="/files">
-                    <a href="#/files"><span class="glyphicon glyphicon-folder-open"></span>
-                        Files</a>
+                    <a href="#/files"
+                       title="Files used in WireMock responses (directly or referenced by mapping)"
+                            ><span class="glyphicon glyphicon-folder-open"></span> Files</a>
                 </li>
             </ul>
             <ul class="nav navbar-nav navbar-right">
-                <li data-match-route="/settings">
+                <li data-match-route="/settings" title="General settings of WireMock">
                     <a href="#/settings"><span class="glyphicon glyphicon-cog"></span> Settings</a>
                 </li>
                 <li>
                     <a href="https://github.com/rabelenda/wiremock/tree/master/docs/source"
-                       target="_blank"><span class="glyphicon glyphicon-book"></span> Docs</a>
+                       title="Documentation about WireMock" target="_blank"><span
+                            class="glyphicon glyphicon-book"></span> Docs</a>
                 </li>
             </ul>
         </div>
