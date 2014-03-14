@@ -21,7 +21,7 @@
 </div>
 <div class="row">
   <div class="input-group">
-    <input type="text" ng-model="query" autofocus="true" class="form-control"
+    <input type="text" ng-model="$storage.requestsQuery" autofocus="true" class="form-control"
            placeholder="Search" labs-enter="search()"/>
     <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span>
         {{filteredRequests.length}} of {{requests.length}} requests</span>
@@ -32,12 +32,12 @@
     <a class="btn btn-danger" href="" ng-click="clear()"><span
             class="glyphicon glyphicon-trash"></span> Clear</a>
     <span class="label label-warning" ng-show="loading > 0">Loading...</span>
-    <button type="button" class="btn btn-default pull-right" ng-model="bodyDecoding"
+    <button type="button" class="btn btn-default pull-right" ng-model="$storage.bodyDecoding"
           ng-options="decoding.value as decoding.label for decoding in decodings"
           bs-select ng-change="updatedDecoding()"
           data-placement="bottom-right" style="width: 80px">
     </button>
-    <button type="button" class="btn btn-default pull-right" ng-model="showHeaders"
+    <button type="button" class="btn btn-default pull-right" ng-model="$storage.showHeaders"
             ng-change="updatedShowHeaders()" bs-checkbox style="margin-right:5px">HTTP
         Headers</button>
   </div>

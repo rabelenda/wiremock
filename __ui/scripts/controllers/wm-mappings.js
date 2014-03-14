@@ -1,11 +1,13 @@
-angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope, $http, $filter) {
+angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope, $http, $filter,
+$localStorage) {
   $scope.loading = 0;
+  $scope.$storage = $localStorage;
 
   // uncomment to search on every key hit
-  // $scope.$watch("query", $scope.search);
+  // $scope.$watch("$localStorage.query", $scope.search);
 
   $scope.search= function() {
-    $scope.filteredMappings = $filter("filter")($scope.mappings, $scope.query);
+    $scope.filteredMappings = $filter("filter")($scope.mappings, $scope.$storage.mappingsQuery);
   }
 
   function startRequest() {

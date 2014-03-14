@@ -1,19 +1,23 @@
-angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope, $http, $filter) {
-  $scope.bodyDecoding = "raw";
+angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope, $http, $filter,
+$localStorage) {
+  $scope.$storage = $localStorage.$default({
+    bodyDecoding : "raw",
+    showHeaders : true
+  });
   $scope.loading = 0;
-  $scope.showHeaders = true;
+
   $scope.decodings = [
-    {"value":"raw","label":"Raw"},
-    {"value":"latin","label":"Latin"},
-    {"value":"utf8","label":"UTF-8"}
+    {"value" : "raw", "label" : "Raw"},
+    {"value" : "latin","label" : "Latin"},
+    {"value" : "utf8", "label" : "UTF-8"}
   ]
   
   $scope.search= function() {
-    $scope.filteredRequests = $filter("filter")($scope.requests, $scope.query);
+    $scope.filteredRequests = $filter("filter")($scope.requests, $scope.$storage.requestsQuery);
   }
 
   // uncomment to search on every key hit
-  // $scope.$watch("query", $scope.search);
+  // $scope.$watch("$storage.query", $scope.search);
 
   function startRequest() {
     $scope.loading++;
@@ -43,7 +47,7 @@ angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope,
 
   $scope.updateDecodedBody= function(request) {
     try {
-      request.decodedBody = decode(request.body, $scope.bodyDecoding);
+      request.decodedBody = decode(request.body, $scope.$storage.bodyDecoding);
       request.failedDecoding = false;
     } catch (err) {
       request.decodedBody = request.body;
@@ -63,7 +67,7 @@ angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope,
   }
 
   $scope.updateHttpRequest= function(request) {
-    request.httpRequest = getHttpRequest(request, $scope.showHeaders);
+    request.httpRequest = getHttpRequest(request, $scope.$storage.showHeaders);
   }
 
   $scope.updatedDecoding= function() {
@@ -78,14 +82,6 @@ angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope,
     var reqs = $scope.requests
     for (var i=0, len=reqs.length; i<len; i++) {
       $scope.updateHttpRequest(reqs[i]);
-    }
-  }
-
-  $scope.getDecodedHttpHeader= function() {
-    var reqs = $scope.requests
-    for (var i=0, len=reqs.length; i<len; i++) {
-
-      reqs[i].httpRequest = getHttpRequest(request, $scope.showHeaders);
     }
   }
 
