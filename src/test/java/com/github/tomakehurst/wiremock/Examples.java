@@ -69,6 +69,16 @@ public class Examples extends AcceptanceTestBase {
     }
 
     @Test
+    public void parameterMatching() {
+        stubFor(post(urlMatching("/with/headers.*"))
+                .withParameter("p1", equalTo("val1"))
+                .withParameter("p2", matching("val.*"))
+                .withParameter("p3", notMatching(".*4"))
+                .withParameter("p3", containing("al"))
+                .willReturn(aResponse().withStatus(200)));
+    }
+
+    @Test
     public void priorities() {
 
         //Catch-all case

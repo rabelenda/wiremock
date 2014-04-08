@@ -15,6 +15,16 @@
  */
 package com.github.tomakehurst.wiremock.stubbing;
 
+import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.GET;
+import static com.github.tomakehurst.wiremock.http.RequestMethod.POST;
+import static com.github.tomakehurst.wiremock.matching.ValuePattern.equalTo;
+import static com.github.tomakehurst.wiremock.testsupport.MockRequestBuilder.aRequest;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Arrays.asList;
+import static junit.framework.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 import com.github.tomakehurst.wiremock.common.LocalNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.http.Request;
@@ -22,6 +32,7 @@ import com.github.tomakehurst.wiremock.http.RequestMethod;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 import org.jmock.Expectations;
 import org.jmock.Mockery;
 import org.jmock.integration.junit4.JMock;
@@ -29,16 +40,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.util.Map;
-
-import static com.github.tomakehurst.wiremock.http.RequestMethod.*;
-import static com.github.tomakehurst.wiremock.matching.ValuePattern.equalTo;
-import static com.github.tomakehurst.wiremock.testsupport.MockRequestBuilder.aRequest;
-import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Arrays.asList;
-import static junit.framework.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(JMock.class)
 public class RequestPatternTest {
@@ -268,9 +269,40 @@ public class RequestPatternTest {
     }
 
     @Test
+    public void supportsMatchingOnAbsentParameter() {
+        ignoringNotifier();
+
+        RequestPattern requestPattern = new RequestPattern(GET);
+        requestPattern.setUrlPattern("/without/parameter.*");
+        requestPattern.addParameter("myParameter", ValuePattern.absent());
+        Request request = aRequest(context)
+                .withUrl("/without/parameter?anotherParameter=value")
+                .withMethod(GET)
+                .withParameter("anotherParameter", "value")
+                .build();
+
+        assertTrue("Request is not a match for the request pattern", requestPattern.isMatchedBy(request).isMatched());
+    }
+
+    @Test
+    public void shouldFailMatchWhenRequiredAbsentParameterIsPresent() {
+        ignoringNotifier();
+
+        RequestPattern requestPattern = new RequestPattern(GET);
+        requestPattern.setUrlPattern("/without/parameter/fail.*");
+        requestPattern.addHeader("myParameter", ValuePattern.absent());
+        Request request = aRequest(context)
+                .withUrl("/without/header/fail?myParameter=value")
+                .withMethod(GET)
+                .build();
+
+        assertFalse("Request is a match for the request pattern and should not be", requestPattern.isMatchedBy(request).isMatched());
+    }
+
+    @Test
 	public void shouldLogMessageIndicatingFailedMethodMatch() {
 		context.checking(new Expectations() {{
-			one(notifier).info("URL /for/logging is match, but method GET is not");
+			one(notifier).info("Method GET does not match");
 		}});
 		
 		RequestPattern requestPattern = new RequestPattern(POST, "/for/logging");
@@ -286,7 +318,8 @@ public class RequestPatternTest {
 	@Test
 	public void shouldLogMessageIndicatingFailedHeaderMatch() {
 		context.checking(new Expectations() {{
-			one(notifier).info("URL /for/logging is match, but header Content-Type is not. For a match, value should equal text/xml");
+			one(notifier).info("Header Content-Type does not match. For a match, " +
+                    "value should equal text/xml");
 		}});
 		
 		RequestPattern requestPattern = new RequestPattern(POST, "/for/logging");
@@ -302,11 +335,33 @@ public class RequestPatternTest {
 		
 		requestPattern.isMatchedBy(request);
 	}
+
+    @Test
+    public void shouldLogMessageIndicatingFailedParameterMatch() {
+        context.checking(new Expectations() {{
+            one(notifier).info("Parameter p1 does not match. For a match, " +
+                    "value should equal val1");
+        }});
+
+        RequestPattern requestPattern = new RequestPattern(GET);
+        requestPattern.setUrlPattern("/for/logging.*");
+        ValuePattern parameterPattern = new ValuePattern();
+        parameterPattern.setEqualTo("val1");
+        requestPattern.addParameter("p1", parameterPattern);
+
+        Request request = aRequest(context)
+                .withUrl("/for/logging?p1=val2")
+                .withMethod(GET)
+                .withParameter("p1", "val2")
+                .build();
+
+        requestPattern.isMatchedBy(request);
+    }
 	
 	@Test
 	public void shouldLogMessageIndicatingFailedBodyMatch() {
 		context.checking(new Expectations() {{
-			one(notifier).info("URL /for/logging is match, but body is not: Actual Content");
+			one(notifier).info("Body does not match: Actual Content");
 		}});
 		
 		RequestPattern requestPattern = new RequestPattern(POST, "/for/logging");

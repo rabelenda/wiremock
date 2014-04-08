@@ -31,6 +31,7 @@ public class MockRequestBuilder {
 	private String url = "/";
 	private RequestMethod method = GET;
     private List<HttpHeader> individualHeaders = newArrayList();
+    private List<HttpParameter> individualParameters = newArrayList();
 	private String body = "";
 	private boolean browserProxyRequest = false;
 	
@@ -68,6 +69,11 @@ public class MockRequestBuilder {
 		return this;
 	}
 
+    public MockRequestBuilder withParameter(String key, String value) {
+        individualParameters.add(new HttpParameter(key, value));
+        return this;
+    }
+
 	public MockRequestBuilder withBody(String body) {
 		this.body = body;
 		return this;
@@ -80,6 +86,7 @@ public class MockRequestBuilder {
 	
 	public Request build() {
         final HttpHeaders headers = new HttpHeaders(individualHeaders);
+        final HttpParameters parameters = new HttpParameters(individualParameters);
 
 		final Request request = mockName == null ? context.mock(Request.class) : context.mock(Request.class, mockName);
 		context.checking(new Expectations() {{
@@ -102,6 +109,16 @@ public class MockRequestBuilder {
             allowing(request).getHeaders(); will(returnValue(headers));
 			allowing(request).getAllHeaderKeys(); will(returnValue(newLinkedHashSet(headers.keys())));
 			allowing(request).containsHeader(with(any(String.class))); will(returnValue(false));
+
+            for (HttpParameter parameter: parameters.all()) {
+                allowing(request).parameter(parameter.key()); will(returnValue(parameter));
+            }
+
+            allowing(request).parameter(with(any(String.class))); will(returnValue(HttpParameter
+                    .absent("key")));
+            allowing(request).getParameters(); will(returnValue(parameters));
+
+
 			allowing(request).getBodyAsString(); will(returnValue(body));
 			allowing(request).getAbsoluteUrl(); will(returnValue("http://localhost:8080" + url));
 			allowing(request).isBrowserProxyRequest(); will(returnValue(browserProxyRequest));

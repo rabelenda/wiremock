@@ -30,5 +30,6 @@ public interface Request {
 	Set<String> getAllHeaderKeys();
 	String getBodyAsString();
 	boolean isBrowserProxyRequest();
-	
+    HttpParameter parameter(String key);
+    HttpParameters getParameters();
 }

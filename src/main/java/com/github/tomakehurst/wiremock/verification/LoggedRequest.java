@@ -25,8 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
-import static com.github.tomakehurst.wiremock.http.HttpHeaders.copyOf;
-
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class LoggedRequest implements Request {
 
@@ -36,6 +34,7 @@ public class LoggedRequest implements Request {
 	private final String absoluteUrl;
 	private final RequestMethod method;
 	private final HttpHeaders headers;
+    private final HttpParameters parameters;
 	private final String body;
 	private final boolean isBrowserProxyRequest;
     private final Date loggedDate;
@@ -44,8 +43,9 @@ public class LoggedRequest implements Request {
         return new LoggedRequest(request.getUrl(),
                 request.getAbsoluteUrl(),
                 request.getMethod(),
-                copyOf(request.getHeaders()),
+                HttpHeaders.copyOf(request.getHeaders()),
                 request.getBodyAsString(),
+                HttpParameters.copyOf(request.getParameters()),
                 request.isBrowserProxyRequest(),
                 new Date());
 	}
@@ -58,12 +58,30 @@ public class LoggedRequest implements Request {
                          @JsonProperty("body") String body,
                          @JsonProperty("browserProxyRequest") boolean isBrowserProxyRequest,
                          @JsonProperty("loggedDate") Date loggedDate) {
+        this(url,
+                absoluteUrl,
+                method,
+                headers,
+                body,
+                HttpParameters.noParameters(),
+                isBrowserProxyRequest,
+                loggedDate);
+    }
 
+    private LoggedRequest(String url,
+                         String absoluteUrl,
+                         RequestMethod method,
+                         HttpHeaders headers,
+                         String body,
+                         HttpParameters parameters,
+                         boolean isBrowserProxyRequest,
+                         Date loggedDate) {
         this.url = url;
         this.absoluteUrl = absoluteUrl;
         this.method = method;
         this.body = body;
         this.headers = headers;
+        this.parameters = parameters;
         this.isBrowserProxyRequest = isBrowserProxyRequest;
         this.loggedDate = loggedDate;
     }
@@ -129,6 +147,17 @@ public class LoggedRequest implements Request {
 	public boolean isBrowserProxyRequest() {
 		return isBrowserProxyRequest;
 	}
+
+    @Override
+    public HttpParameter parameter(String key) {
+        return parameters.getParameter(key);
+    }
+
+    @Override
+    @JsonIgnore
+    public HttpParameters getParameters() {
+        return parameters;
+    }
 
     public Date getLoggedDate() {
         return loggedDate;

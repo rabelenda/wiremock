@@ -19,7 +19,8 @@ public enum MimeType {
 	
 	JSON("application/json"),
 	XML("text/xml"),
-	PLAIN("text/plain");
+	PLAIN("text/plain"),
+    FORM("application/x-www-form-urlencoded");
 
 	private String mimeString;
 	

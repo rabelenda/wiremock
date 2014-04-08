@@ -17,6 +17,7 @@ package com.github.tomakehurst.wiremock;
 
 import com.github.tomakehurst.wiremock.client.VerificationException;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.MimeType;
 import com.github.tomakehurst.wiremock.junit.WireMockRule;
 import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
 import org.junit.Rule;
@@ -36,6 +37,36 @@ import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 @RunWith(Enclosed.class)
 public class VerificationAcceptanceTest {
 
+    private enum HttpHeaderName {
+        CONTENT_TYPE("Content-Type"), ENCODING("Encoding");
+
+        private final String headerName;
+
+        HttpHeaderName(String headerName) {
+            this.headerName = headerName;
+        }
+
+        @Override
+        public String toString() {
+            return headerName;
+        }
+    }
+    
+    private enum HttpEncoding {
+        UTF("UTF-8"), LATIN("LATIN-1");
+
+        private final String encoding;
+
+        HttpEncoding(String encoding) {
+            this.encoding = encoding;
+        }
+
+        @Override
+        public String toString() {
+            return encoding;
+        }
+    }
+
     public static class JournalEnabled extends AcceptanceTestBase {
 
         @Test
@@ -52,10 +83,14 @@ public class VerificationAcceptanceTest {
 
         @Test
         public void verifiesWithHeaders() {
-            testClient.put("/update/this", withHeader("Content-Type", "application/json"), withHeader("Encoding", "UTF-8"));
+            testClient.put("/update/this", withHeader(HttpHeaderName.CONTENT_TYPE.toString(), 
+                    MimeType.JSON.toString()), 
+                    withHeader(HttpHeaderName.ENCODING.toString(), HttpEncoding.UTF.toString()));
             verify(putRequestedFor(urlMatching("/[a-z]+/this"))
-                    .withHeader("Content-Type", equalTo("application/json"))
-                    .withHeader("Encoding", notMatching("LATIN-1")));
+                    .withHeader(HttpHeaderName.CONTENT_TYPE.toString(), 
+                            equalTo(MimeType.JSON.toString()))
+                    .withHeader(HttpHeaderName.ENCODING.toString(),
+                            notMatching(HttpEncoding.LATIN.toString())));
         }
 
         @Test
@@ -75,10 +110,14 @@ public class VerificationAcceptanceTest {
 
         @Test(expected=VerificationException.class)
         public void throwsVerificationExceptionWhenHeadersDoNotMatch() {
-            testClient.put("/to/modify", withHeader("Content-Type", "application/json"), withHeader("Encoding", "LATIN-1"));
+            testClient.put("/to/modify", withHeader(HttpHeaderName.CONTENT_TYPE.toString(), 
+                    MimeType.JSON.toString()), 
+                    withHeader(HttpHeaderName.ENCODING.toString(), HttpEncoding.LATIN.toString()));
             verify(putRequestedFor(urlEqualTo("/to/modify"))
-                    .withHeader("Content-Type", equalTo("application/json"))
-                    .withHeader("Encoding", notMatching("LATIN-1")));
+                    .withHeader(HttpHeaderName.CONTENT_TYPE.toString(), 
+                            equalTo(MimeType.JSON.toString()))
+                    .withHeader(HttpHeaderName.ENCODING.toString(),
+                            notMatching(HttpEncoding.LATIN.toString())));
         }
 
         private static final String SAMPLE_JSON =
@@ -91,43 +130,54 @@ public class VerificationAcceptanceTest {
 
         @Test
         public void verifiesWithBody() {
-            testClient.postWithBody("/add/this", SAMPLE_JSON, "application/json", "utf-8");
+            testClient.postWithBody("/add/this", SAMPLE_JSON, MimeType.JSON.toString(), 
+                    HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/add/this"))
                     .withRequestBody(matching(".*\"importantKey\": \"Important value\".*")));
         }
 
         @Test
         public void verifiesWithBodyContainingJson() {
-            testClient.postWithBody("/body/contains", SAMPLE_JSON, "application/json", "utf-8");
+            testClient.postWithBody("/body/contains", SAMPLE_JSON, MimeType.JSON.toString(), 
+                    HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/body/contains"))
                     .withRequestBody(matchingJsonPath("$.thing"))
-                    .withRequestBody(matchingJsonPath("$..*[?(@.importantKey == 'Important value')]")));
+                    .withRequestBody(matchingJsonPath(
+                            "$..*[?(@.importantKey == 'Important " + "value')]")));
         }
 
         @Test
         public void verifiesWithBodyEquallingJson() {
-            testClient.postWithBody("/body/json", SAMPLE_JSON, "application/json", "utf-8");
+            testClient.postWithBody("/body/json", SAMPLE_JSON, MimeType.JSON.toString(), 
+                    HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/body/json"))
                     .withRequestBody(equalToJson(SAMPLE_JSON)));
         }
 
         @Test
         public void verifiesWithBodyEquallingJsonWithCompareMode() {
-            testClient.postWithBody("/body/json/lenient", "{ \"message\": \"Hello\", \"key\": \"welcome.message\" }", "application/json", "utf-8");
+            testClient.postWithBody("/body/json/lenient", "{ \"message\": \"Hello\", " +
+                    "\"key\": \"welcome.message\" }", MimeType.JSON.toString(), 
+                    HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/body/json/lenient"))
                     .withRequestBody(equalToJson("{ \"message\": \"Hello\" }", LENIENT)));
         }
 
         @Test
         public void verifiesWithBodyEquallingXml() {
-            testClient.postWithBody("/body/xml", "<thing><subThing>The stuff</subThing></thing>", "application/xml", "utf-8");
+            testClient.postWithBody("/body/xml", "<thing><subThing>The stuff</subThing></thing>",
+                    MimeType.XML.toString(), HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/body/xml"))
-                    .withRequestBody(equalToXml("<thing>     <subThing>The stuff\n</subThing>\n\n    </thing>")));
+                    .withRequestBody(equalToXml(
+                            "<thing>     <subThing>The stuff\n</subThing>\n\n" + "    </thing>")));
         }
 
         @Test
         public void verifiesWithBodyContainingString() {
-            testClient.postWithBody("/body/json", SAMPLE_JSON, "application/json", "utf-8");
+            testClient.postWithBody("/body/json",
+                    SAMPLE_JSON,
+                    MimeType.JSON.toString(),
+                    HttpEncoding.UTF.toString());
             verify(postRequestedFor(urlEqualTo("/body/json"))
                     .withRequestBody(containing("Important value")));
         }
@@ -155,17 +205,20 @@ public class VerificationAcceptanceTest {
 
         @Test
         public void verifiesHeaderAbsent() {
-            testClient.get("/without/header", withHeader("Content-Type", "application/json"));
+            testClient.get("/without/header", withHeader(HttpHeaderName.CONTENT_TYPE.toString(), 
+                    MimeType.JSON.toString()));
             verify(getRequestedFor(urlEqualTo("/without/header"))
-                    .withHeader("Content-Type", equalTo("application/json"))
+                    .withHeader(HttpHeaderName.CONTENT_TYPE.toString(),
+                            equalTo(MimeType.JSON.toString()))
                     .withoutHeader("Accept"));
         }
 
         @Test(expected=VerificationException.class)
         public void failsVerificationWhenAbsentHeaderPresent() {
-            testClient.get("/without/another/header", withHeader("Content-Type", "application/json"));
+            testClient.get("/without/another/header",
+                    withHeader(HttpHeaderName.CONTENT_TYPE.toString(), MimeType.JSON.toString()));
             verify(getRequestedFor(urlEqualTo("/without/another/header"))
-                    .withoutHeader("Content-Type"));
+                    .withoutHeader(HttpHeaderName.CONTENT_TYPE.toString()));
         }
 
         @Test
@@ -204,16 +257,62 @@ public class VerificationAcceptanceTest {
 
         @Test
         public void verifiesPatchRequests() {
-            testClient.patchWithBody("/patch/this", SAMPLE_JSON, "application/json");
+            testClient.patchWithBody("/patch/this", SAMPLE_JSON, MimeType.JSON.toString());
             verify(patchRequestedFor(urlEqualTo("/patch/this"))
                     .withRequestBody(matching(".*\"importantKey\": \"Important value\".*")));
         }
+
+        @Test
+        public void verifiesWithParametersInUrl() {
+            testClient.put("/update/this?p1=val1&p2=val2");
+            verify(putRequestedFor(urlMatching("/update/this.*"))
+                    .withParameter("p1", equalTo("val1"))
+                    .withParameter("p2", notMatching("valX")));
+        }
+
+        @Test
+        public void verifiesWithMultiValueParameters() {
+            testClient.get("/multi/value/parameter?p1=val1&p1=val2");
+
+            verify(getRequestedFor(urlMatching("/multi/value/parameter.*"))
+                    .withParameter("p1", equalTo("val1"))
+                    .withParameter("p1", matching(".*2")));
+
+            verify(getRequestedFor(urlMatching("/multi/value/parameter.*"))
+                    .withParameter("p1", equalTo("val2")));
+        }
+
+        @Test(expected=VerificationException.class)
+        public void throwsVerificationExceptionWhenParametersDoNotMatch() {
+            testClient.put("/to/modify?p1=val1&p2=val2");
+            verify(putRequestedFor(urlEqualTo("/to/modify"))
+                    .withParameter("p1", equalTo("val1"))
+                    .withParameter("p2", notMatching("val2")));
+        }
+
+        @Test
+        public void verifiesParameterAbsent() {
+            testClient.get("/without/header?p1=val1");
+            verify(getRequestedFor(urlMatching("/without/header.*"))
+                    .withParameter("p1", equalTo("val1"))
+                    .withoutParameter("p2"));
+        }
+
+        @Test(expected=VerificationException.class)
+        public void failsVerificationWhenAbsentParameterPresent() {
+            testClient.get("/without/another/header?p1=val1");
+            verify(getRequestedFor(urlMatching("/without/header.*"))
+                    .withoutParameter("p1"));
+        }
+
+
     }
 
     public static class JournalDisabled {
 
         @Rule
-        public WireMockRule wireMockRule = new WireMockRule(wireMockConfig().disableRequestJournal());
+        public WireMockRule wireMockRule = new WireMockRule(wireMockConfig()
+                .disableRequestJournal());
 
         @Test(expected=RequestJournalDisabledException.class)
         public void verifyThrowsExceptionWhenVerificationAttemptedAndRequestJournalDisabled() {

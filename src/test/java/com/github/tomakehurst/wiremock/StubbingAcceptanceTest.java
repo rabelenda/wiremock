@@ -118,6 +118,58 @@ public class StubbingAcceptanceTest extends AcceptanceTestBase {
 
         assertThat(response.statusCode(), is(200));
     }
+
+    @Test
+    public void mappingWithParameterMatchers() {
+        stubFor(put(urlMatching("/some/url.*"))
+                .withParameter("One", equalTo("abcd1234"))
+                .withParameter("Two", matching("[a-z]{5}"))
+                .withParameter("Three", notMatching("[A-Z]+"))
+                .willReturn(aResponse().withStatus(204)));
+
+        WireMockResponse response = testClient.put(
+                "/some/url?Two=thing&One=abcd1234&Three=something");
+
+        assertThat(response.statusCode(), is(204));
+    }
+
+    @Test
+    public void mappingWithCaseInsensitiveParameterMatchers() {
+        stubFor(put(urlMatching("/case/insensitive.*"))
+                .withParameter("ONE", equalTo("abcd1234"))
+                .withParameter("two", matching("[a-z]{5}"))
+                .withParameter("Three", notMatching("[A-Z]+"))
+                .willReturn(aResponse().withStatus(204)));
+
+        WireMockResponse response = testClient.put
+                ("/case/insensitive?TWO=thing&one=abcd1234&tHrEe=something");
+
+        assertThat(response.statusCode(), is(204));
+    }
+
+    @Test
+    public void doesNotMatchOnAbsentParameter() {
+        stubFor(post(urlMatching("/some/url.*"))
+                .withRequestBody(containing("BODY"))
+                .withParameter("NoSuchParameter", equalTo("This better not be here"))
+                .willReturn(aResponse().withStatus(200)));
+
+        assertThat(testClient.postWithBody("/some/url", "BODY", "text/plain",
+                "utf-8").statusCode(), is(404));
+    }
+
+    @Test
+    public void matchesIfRequestContainsParameterNotSpecified() {
+        stubFor(get(urlMatching("/some/extra/parameter.*"))
+                .withParameter("ExpectedParameter", equalTo("expected-value"))
+                .willReturn(aResponse().withStatus(200)));
+
+        WireMockResponse response = testClient.get
+                ("/some/extra/parameter?ExpectedParameter=expected-value&UnexpectedParameter" +
+                        "=unexpected-value");
+
+        assertThat(response.statusCode(), is(200));
+    }
 	
 	@Test
 	public void responseBodyLoadedFromFile() {

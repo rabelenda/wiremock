@@ -69,6 +69,26 @@ public class MappingBuilderTest {
 		assertThat(mapping.getRequest().getHeaders(), hasEntry("Encoding", headerMatches("UTF-\\d")));
 		assertThat(mapping.getRequest().getHeaders(), hasEntry("X-My-Thing", headerDoesNotMatch("[A-Z]+")));
 	}
+
+    @Test
+    public void shouldBuildMappingWithExactUrlAndRequestParameters() {
+        UrlMatchingStrategy urlStrategy = new UrlMatchingStrategy();
+        urlStrategy.setUrl("/match/this");
+
+        StubMapping mapping =
+                new MappingBuilder(POST, urlStrategy)
+                        .withParameter("p1", parameterStrategyEqualTo("val1"))
+                        .withParameter("p2", parameterStrategyMatches("val\\d"))
+                        .withParameter("p3", parameterStrategyDoesNotMatch("[A-Z]+"))
+                        .willReturn(new ResponseDefinitionBuilder())
+                        .build();
+
+        assertThat(mapping.getRequest().getParameters(), hasEntry("p1", parameterEqualTo("val1")));
+        assertThat(mapping.getRequest().getParameters(), hasEntry("p2",
+                parameterMatches("val\\d")));
+        assertThat(mapping.getRequest().getParameters(), hasEntry("p3",
+                parameterDoesNotMatch("[A-Z]+")));
+    }
 	
 	@Test
 	public void shouldBuildMappingWithResponseBody() {
@@ -140,4 +160,40 @@ public class MappingBuilderTest {
 		headerStrategy.setDoesNotMatch(value);
 		return headerStrategy;
 	}
+
+    private ValuePattern parameterEqualTo(String value) {
+        ValuePattern parameterPattern = new ValuePattern();
+        parameterPattern.setEqualTo(value);
+        return parameterPattern;
+    }
+
+    private ValuePattern parameterMatches(String value) {
+        ValuePattern parameterPattern = new ValuePattern();
+        parameterPattern.setMatches(value);
+        return parameterPattern;
+    }
+
+    private ValuePattern parameterDoesNotMatch(String value) {
+        ValuePattern parameterPattern = new ValuePattern();
+        parameterPattern.setDoesNotMatch(value);
+        return parameterPattern;
+    }
+
+    private ValueMatchingStrategy parameterStrategyEqualTo(String value) {
+        ValueMatchingStrategy parameterStrategy = new ValueMatchingStrategy();
+        parameterStrategy.setEqualTo(value);
+        return parameterStrategy;
+    }
+
+    private ValueMatchingStrategy parameterStrategyMatches(String value) {
+        ValueMatchingStrategy parameterStrategy = new ValueMatchingStrategy();
+        parameterStrategy.setMatches(value);
+        return parameterStrategy;
+    }
+
+    private ValueMatchingStrategy parameterStrategyDoesNotMatch(String value) {
+        ValueMatchingStrategy parameterStrategy = new ValueMatchingStrategy();
+        parameterStrategy.setDoesNotMatch(value);
+        return parameterStrategy;
+    }
 }

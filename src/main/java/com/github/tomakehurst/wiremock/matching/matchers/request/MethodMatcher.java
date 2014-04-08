@@ -35,7 +35,7 @@ public class MethodMatcher extends RequestMatcher {
     public PatternMatch matches(Request request) {
         boolean matched = method == null || method == ANY || request.getMethod() == method;
         if (!matched) {
-            notifier().info(String.format("URL %s is match, but method %s is not", request.getUrl(), request.getMethod()));
+            notifier().info(String.format("Method %s does not match", request.getMethod()));
         }
         return PatternMatch.fromMatched(matched);
     }

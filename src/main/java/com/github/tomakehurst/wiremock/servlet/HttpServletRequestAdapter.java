@@ -21,10 +21,7 @@ import com.google.common.io.CharStreams;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
-import java.util.Enumeration;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Lists.newArrayList;
@@ -68,12 +65,12 @@ public class HttpServletRequestAdapter implements Request {
 	public String getBodyAsString() {
 		if (cachedBody == null) {
 			try {
-				cachedBody = CharStreams.toString(request.getReader());
+                cachedBody = CharStreams.toString(request.getReader());
 			} catch (IOException ioe) {
 				throw new RuntimeException(ioe);
 			}
 		}
-		
+
 		return cachedBody;
 	}
 
@@ -135,8 +132,45 @@ public class HttpServletRequestAdapter implements Request {
 		return headerKeys;
 	}
 
-	@Override
+    @SuppressWarnings("unchecked")
+    @Override
+    public HttpParameter parameter(String key) {
+        //cant directly use request.getParameterValues(key) since is case sensitive
+        List<String> parameterNames = list(request.getParameterNames());
+        for (String currentKey: parameterNames) {
+            if (currentKey.toLowerCase().equals(key.toLowerCase())) {
+                List<String> valueList = Arrays.asList(request.getParameterValues(currentKey));
+                return new HttpParameter(key, valueList);
+            }
+        }
+
+        return HttpParameter.absent(key);
+    }
+
+    @Override
+    public HttpParameters getParameters() {
+        List<HttpParameter> parameterList = newArrayList();
+        for (String key: getAllParameterKeys()) {
+            parameterList.add(parameter(key));
+        }
+
+        return new HttpParameters(parameterList);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Set<String> getAllParameterKeys() {
+        LinkedHashSet<String> parameterKeys = new LinkedHashSet<String>();
+        for (Enumeration<String> parameterNames = request.getParameterNames(); parameterNames
+                .hasMoreElements();) {
+            parameterKeys.add(parameterNames.nextElement());
+        }
+
+        return parameterKeys;
+    }
+
+    @Override
 	public boolean isBrowserProxyRequest() {
 		return ServletContainerUtils.isBrowserProxyRequest(request);
 	}
+
 }

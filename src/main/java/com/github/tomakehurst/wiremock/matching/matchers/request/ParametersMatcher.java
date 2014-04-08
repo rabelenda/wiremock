@@ -14,31 +14,33 @@
  * limitations under the License.
  */
 
+/**
+ *
+ */
 package com.github.tomakehurst.wiremock.matching.matchers.request;
 
-import com.github.tomakehurst.wiremock.http.HttpHeader;
+import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
+
+import com.github.tomakehurst.wiremock.http.HttpParameter;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.matching.PatternMatch;
 import com.github.tomakehurst.wiremock.matching.ValuePattern;
 import com.github.tomakehurst.wiremock.matching.matchers.string.PatternMatcher;
 import com.google.common.collect.ImmutableMap;
-
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-
-public class HeadersMatcher extends RequestMatcher {
+public class ParametersMatcher extends RequestMatcher {
 
     private final Map<String, PatternMatcher> matchers;
 
-    public HeadersMatcher(Map<String,ValuePattern> headerPatterns) {
-        matchers = getMatchers(headerPatterns);
+    public ParametersMatcher(Map<String, ValuePattern> parameterPatterns) {
+        matchers = getMatchers(parameterPatterns);
     }
 
-    private Map<String, PatternMatcher> getMatchers(Map<String, ValuePattern> headerPatterns) {
+    private Map<String, PatternMatcher> getMatchers(Map<String, ValuePattern> parameterPatterns) {
         ImmutableMap.Builder<String, PatternMatcher> matchersBuilder = new ImmutableMap.Builder<String, PatternMatcher>();
-        if (headerPatterns != null) {
-            for (Map.Entry<String, ValuePattern> entry : headerPatterns.entrySet()) {
+        if (parameterPatterns != null) {
+            for (Map.Entry<String, ValuePattern> entry : parameterPatterns.entrySet()) {
                 if (entry.getValue() == null) {
                     matchersBuilder.put(entry.getKey(), PatternMatcher.none());
                 } else {
@@ -53,11 +55,11 @@ public class HeadersMatcher extends RequestMatcher {
     public PatternMatch matches(Request request) {
         PatternMatch matched = PatternMatch.matched();
         for (Map.Entry<String, PatternMatcher> matcher: matchers.entrySet()) {
-            HttpHeader header = request.header(matcher.getKey());
-            PatternMatch match = header.hasValueMatching(matcher.getValue());
+            HttpParameter parameter = request.parameter(matcher.getKey());
+            PatternMatch match = parameter.hasValueMatching(matcher.getValue());
             if (!match.isMatched()) {
                 notifier().info(String.format(
-                        "Header %s does not match. For a match, value should %s",
+                        "Parameter %s does not match. For a match, value should %s",
                         matcher.getKey(),
                         matcher.getValue().toString()));
                 return match;
@@ -67,5 +69,4 @@ public class HeadersMatcher extends RequestMatcher {
         }
         return matched;
     }
-
 }

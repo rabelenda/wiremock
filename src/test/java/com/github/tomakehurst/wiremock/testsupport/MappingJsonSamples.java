@@ -176,6 +176,31 @@ public class MappingJsonSamples {
 		"		\"status\": 201								\n" +
 		"	}												\n" +
 		"}													";
+
+    public static final String WITH_REQUEST_PARAMETERS =
+            "{ 													                \n" +
+                    "	\"request\": {									        \n" +
+                    "		\"method\": \"PUT\",						        \n" +
+                    "		\"urlPattern\": \"/parameter/matches/dependent.*\", \n" +
+                    "		\"parameters\": {							        \n" +
+                    "			\"p1\": {						                \n" +
+                    "				\"equalTo\": \"val1\"			            \n" +
+                    "			},										        \n" +
+                    "			\"p2\": {					                    \n" +
+                    "				\"contains\": \"al\"			            \n" +
+                    "			},										        \n" +
+                    "			\"p3\": {					                    \n" +
+                    "				\"matches\": \"([a-z0-9]*)\"		        \n" +
+                    "			},										        \n" +
+                    "			\"p4\": {							            \n" +
+                    "				\"doesNotMatch\": \"(.*)err(.*)\"	        \n" +
+                    "			}										        \n" +
+                    "		}											        \n" +
+                    "	},												        \n" +
+                    "	\"response\": {									        \n" +
+                    "		\"status\": 201								        \n" +
+                    "	}												        \n" +
+                    "}													        ";
 	
 	public static final String WITH_BODY_PATTERNS =
 		"{ 														\n" +

@@ -86,6 +86,54 @@ And in JSON via the ``urlPattern`` attribute:
         }
     }
 
+.. _stubbing-url-parameters:
+
+URL parameters
+============
+
+If you want the URL to contain certain parameters without worrying about the order of the parameters
+(if the order is known or is strict the use URL matching) you can use something like this:
+
+.. code-block:: java
+
+    stubFor(get(urlMatching("/with/parameters.*"))
+        .withParameter("param1", equalTo("val1"))
+        .withParameter("param2", matching("123.*"))
+        .withParameter("param3", notMatching("abcd.*"))
+        .withParameter("param3", containing("2134"))
+            .willReturn(aResponse().withStatus(200)));
+
+Or
+
+.. code-block:: javascript
+
+    {
+    	"request": {
+            "method": "GET",
+            "url": "/with/parameters.*",
+            "parameters": {
+                "param1": {
+                    "equalTo": "val1"
+                },
+                "param2": {
+                    "matches": "123.*"
+                },
+                "param3": {
+                    "doesNotMatch": "abcd.*"
+                },
+                "param3": {
+                    "contains": "2134"
+                }
+            }
+    	},
+    	"response": {
+    		"status": 200
+    	}
+    }
+
+NOTE: Currently only URL parameters can be matched with this stubbing. No support for matching
+parameters in an application/x-www-form-urlencoded
+
 .. _stubbing-request-header-matching:
 
 Request header matching

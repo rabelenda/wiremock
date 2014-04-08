@@ -52,6 +52,11 @@ public class MappingBuilder {
 		requestPatternBuilder.withRequestBody(bodyMatchingStrategy);
 		return this;
 	}
+
+    public MappingBuilder withParameter(String key, ValueMatchingStrategy parameterMatchingStrategy) {
+        requestPatternBuilder.withParameter(key, parameterMatchingStrategy);
+        return this;
+    }
 	
 	public MappingBuilder inScenario(String scenarioName) {
 		this.scenarioName = scenarioName;

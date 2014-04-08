@@ -158,6 +158,18 @@ public class WireMockClientTest {
 				.withHeader("Accept", notMatching("(.*)xml(.*)"))
 				.willReturn(aResponse().withStatus(201)));
 	}
+
+    @Test
+    public void shouldAddMappingWithAll3TypesOfRequestParameterMatch() {
+        expectExactlyOneAddResponseCallWithJson(MappingJsonSamples.WITH_REQUEST_PARAMETERS);
+        wireMock.register(
+                put(urlMatching("/parameter/matches/dependent.*"))
+                        .withParameter("p1", equalTo("val1"))
+                        .withParameter("p2", containing("al"))
+                        .withParameter("p3", matching("([a-z0-9]*)"))
+                        .withParameter("p4", notMatching("(.*)err(.*)"))
+                        .willReturn(aResponse().withStatus(201)));
+    }
 	
 	@Test
 	public void shouldAddMappingWithAll4BodyPatternTypes() {

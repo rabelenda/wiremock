@@ -53,7 +53,7 @@ public class BodyMatcher extends RequestMatcher {
         String body = request.getBodyAsString();
         PatternMatch match = matcher.matches(body);
         if (!match.isMatched()) {
-            notifier().info(String.format("URL %s is match, but body is not: %s", request.getUrl(), body));
+            notifier().info(String.format("Body does not match: %s", body));
         }
         return match;
     }
