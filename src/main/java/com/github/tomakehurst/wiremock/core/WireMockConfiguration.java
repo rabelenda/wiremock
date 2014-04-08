@@ -20,6 +20,7 @@ import com.github.tomakehurst.wiremock.common.*;
 public class WireMockConfiguration implements Options {
 
     private int portNumber = DEFAULT_PORT;
+    private String bindAddress = DEFAULT_BIND_ADDRESS;
     private Integer httpsPort = null;
     private String keyStorePath = null;
     private boolean browserProxyingEnabled = false;
@@ -74,6 +75,11 @@ public class WireMockConfiguration implements Options {
 
     public WireMockConfiguration notifier(Notifier notifier) {
         this.notifier = notifier;
+        return this;
+    }
+    
+    public WireMockConfiguration bindAddress(String bindAddress){
+        this.bindAddress = bindAddress;
         return this;
     }
 
@@ -132,5 +138,10 @@ public class WireMockConfiguration implements Options {
 
     public boolean requestJournalDisabled() {
         return Integer.valueOf(0).equals(journalCapacity);
+    }
+
+    @Override
+    public String bindAddress() {
+        return bindAddress;
     }
 }
