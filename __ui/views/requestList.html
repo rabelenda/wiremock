@@ -15,7 +15,7 @@
   -->
 
 <div class="row" ng-show="connectionError">
-  <div class="alert alert-error">
+  <div class="alert alert-danger">
     <strong>Error!</strong> Problem contacting wiremock, check if it is running.
   </div>
 </div>
@@ -49,7 +49,7 @@
     <td class="col-md-12">
       <span class="glyphicon glyphicon-time"></span><span> {{request.loggedDateString
         | date:'yyyy-MM-dd HH:mm:ss'}}</span>
-      <div class="alert alert-error" ng-show="request.failedDecoding">
+      <div class="alert alert-danger" ng-show="request.failedDecoding">
         <strong>Error!</strong> Problem decoding the body, you can try with other charset.
       </div>
       <div hljs source="request.httpRequest"></div>
