@@ -28,9 +28,12 @@ $localStorage) {
   function getWithPrettyJsonAndId(mappings) {
     var ret = [];
     for (var i=0, len=mappings.length; i<len; i++) {
+      var filePath = mappings[i].filePath;
+      delete mappings[i].filePath;
       //need to add id to avoid issues with duplicate mappings
       ret.push({
         "id": i,
+        "filePath": filePath,
         "json": angular.toJson(mappings[i],true)
       });
     }
