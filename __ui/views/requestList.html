@@ -26,35 +26,56 @@
     <span class="input-group-addon"><span class="glyphicon glyphicon-search"></span>
         {{filteredRequests.length}} of {{requests.length}} requests</span>
   </div>
+</div>
+<div class="row">
   <div style="white-space: nowrap;">
     <a class="btn btn-info" href="" ng-click="refresh()"><span
-            class="glyphicon glyphicon-refresh"></span> Refresh</a>
+        class="glyphicon glyphicon-refresh"></span> Refresh</a>
     <a class="btn btn-danger" href="" ng-click="clear()"><span
-            class="glyphicon glyphicon-trash"></span> Clear</a>
+        class="glyphicon glyphicon-trash"></span> Clear</a>
     <span class="label label-warning" ng-show="loading > 0">Loading...</span>
+
+    <button type="button" class="btn btn-default pull-right" ng-model="$storage.requestsView"
+            ng-options="viewOption.value as viewOption.label for viewOption in viewOptions"
+            bs-select data-placement="bottom-right" style="width: 110px">
+    </button>
     <button type="button" class="btn btn-default pull-right" ng-model="$storage.bodyDecoding"
-          ng-options="decoding.value as decoding.label for decoding in decodings"
-          bs-select ng-change="updatedDecoding()"
-          data-placement="bottom-right" style="width: 80px">
+            ng-options="decoding.value as decoding.label for decoding in decodings"
+            bs-select ng-change="updatedDecoding()"
+            data-placement="bottom-right" style="width: 120px; margin-right:5px">
     </button>
     <button type="button" class="btn btn-default pull-right" ng-model="$storage.showHeaders"
             ng-change="updatedShowHeaders()" bs-checkbox style="margin-right:5px">HTTP
-        Headers</button>
+      Headers
+    </button>
   </div>
 </div>
 <div class="row">
-<table class="table table-striped table-hover">
-  <tbody>
-  <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true">
-    <td class="col-md-12">
-      <span class="glyphicon glyphicon-time"></span><span> {{request.loggedDateString
+  <table class="table table-striped table-hover">
+    <tbody>
+    <tr ng-repeat="request in filteredRequests | orderBy:'loggedDateString':reverse=true">
+      <td class="col-md-12" ng-switch="$storage.requestsView">
+        <span class="glyphicon glyphicon-time"></span><span> {{request.loggedDateString
         | date:'yyyy-MM-dd HH:mm:ss'}}</span>
-      <div class="alert alert-danger" ng-show="request.failedDecoding">
-        <strong>Error!</strong> Problem decoding the body, you can try with other charset.
-      </div>
-      <div hljs source="request.httpRequest"></div>
-    </td>
-  </tr>
-  </tbody>
-</table>
+
+        <div class="alert alert-danger" ng-show="request.failedDecoding">
+          <strong>Error!</strong> Problem decoding the body, you can try with other charset.
+        </div>
+        <div ng-switch-when="quick">
+          <pre><code>{{request.httpRequest}}</code></pre>
+        </div>
+        <div ng-switch-when="basic" hljs source="request.httpRequest"></div>
+        <div ng-switch-when="full">
+          <div ui-codemirror="{
+              lineNumbers: true,
+              theme:'rainbow',
+              lineWrapping : true,
+              mode: 'http',
+              readOnly: 'nocursor'
+            }" ng-model="request.httpRequest"></div>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>

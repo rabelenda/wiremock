@@ -1,7 +1,15 @@
 angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope, $http, $filter,
-$localStorage) {
+$localStorage, $modal, $log) {
   $scope.loading = 0;
-  $scope.$storage = $localStorage;
+  $scope.$storage = $localStorage.$default({
+    mappingsView : "quick"
+  });
+
+  $scope.viewOptions = [
+    {"value" : "quick", "label" : "Quick View"},
+    {"value" : "basic","label" : "Basic View"},
+    {"value" : "full", "label" : "Full View"}
+  ]
 
   // uncomment to search on every key hit
   // $scope.$watch("$localStorage.query", $scope.search);
@@ -46,7 +54,7 @@ $localStorage) {
       $scope.mappings = getWithPrettyJsonAndId(data.mappings);
       $scope.search();
       endRequest();
-    }). error(function(data, status) {
+    }).error(function(data, status) {
       failedRequest(data, status);
     });
   };
@@ -56,10 +64,29 @@ $localStorage) {
     $http.post('/__admin/mappings/reset').success(function(data) {
       $scope.refresh();
       endRequest();
-    }). error(function(data, status) {
+    }).error(function(data, status) {
       failedRequest(data, status);
     });
   };
+
+  var mappingDetailModal = $modal({scope: $scope, template: 'views/modals/mappingDetail.html', show: false});
+
+  $scope.editMapping = function(mapping){
+    $scope.editingMapping = mapping;
+    mappingDetailModal.show();
+    mappingDetailModal.$promise.then(function() {
+      $scope.editing = true;
+    });
+  };
+
+  $scope.newMapping = function(){
+    $scope.editingMapping = {};
+    mappingDetailModal.show();
+  };
+
+  $scope.saveMapping = function() {
+    mappingDetailModal.hide();
+  }
 
   $scope.refresh();
 

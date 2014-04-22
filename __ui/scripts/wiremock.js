@@ -1,5 +1,6 @@
-angular.module('wiremock', ['ngRoute','mgcrea.ngStrap','labsEnter','hljs','ngStorage','wmRequests',
-'wmMappings','wmSettings']).
+//,'ui.bootstrap'
+angular.module('wiremock', ['mgcrea.ngStrap','ngRoute','labsEnter','hljs','ngStorage','ui.codemirror'
+,'wmRequests','wmMappings','wmSettings']).
   config(function($routeProvider) {
     $routeProvider.
       when('/requests', {controller: 'RequestListCtrl', templateUrl:'views/requestList.html'}).

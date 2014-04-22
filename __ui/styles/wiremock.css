@@ -1,3 +1,38 @@
 .dropdown-menu {
   min-width: 0px;
 }
+
+pre {
+  margin: 0px;
+}
+
+.row {
+  margin-top: 5px;
+}
+
+.CodeMirror {
+  height: auto;
+  font-size:13px;
+  line-height:1.428571429;
+}
+
+.CodeMirror-wrap pre {
+  word-break: break-all;
+}
+
+.modal-header {
+  padding: 5px;
+}
+
+.modal-body {
+  padding: 5px;
+}
+
+.modal-footer {
+  padding: 5px;
+  margin-top: 0px;
+}
+
+pre {
+  background: #474949; color: #D1D9E1;
+}
