@@ -1,15 +1,7 @@
 angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope, $http, $filter,
 $localStorage, $modal, $log) {
   $scope.loading = 0;
-  $scope.$storage = $localStorage.$default({
-    mappingsView : "quick"
-  });
-
-  $scope.viewOptions = [
-    {"value" : "quick", "label" : "Quick View"},
-    {"value" : "basic","label" : "Basic View"},
-    {"value" : "full", "label" : "Full View"}
-  ]
+  $scope.$storage = $localStorage;
 
   // uncomment to search on every key hit
   // $scope.$watch("$localStorage.query", $scope.search);

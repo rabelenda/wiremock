@@ -35,17 +35,13 @@
     <span class="label label-warning" ng-show="loading > 0">Loading...</span>
     <a class="btn btn-success pull-right" href="" ng-click="newMapping()"><span
         class="glyphicon glyphicon-plus"></span></a>
-    <button type="button" class="btn btn-default pull-right" ng-model="$storage.mappingsView"
-            ng-options="viewOption.value as viewOption.label for viewOption in viewOptions"
-            bs-select data-placement="bottom-right" style="width: 110px; margin-right:5px">
-    </button>
   </div>
 </div>
 <div class="row">
   <table class="table table-striped table-hover">
     <tbody>
     <tr ng-repeat="mapping in filteredMappings">
-      <td class="col-md-12" ng-dblclick="editMapping(mapping)" ng-switch="$storage.mappingsView">
+      <td class="col-md-12" ng-dblclick="editMapping(mapping)">
         <div style="padding-bottom: 5px">
           <span class="glyphicon glyphicon-file"></span><span> {{mapping.filePath}}</span>
           <a class="btn btn-danger btn-xs pull-right" href="" ng-click="deleteMapping(mapping)"
@@ -53,22 +49,7 @@
           <a class="btn btn-warning btn-xs pull-right" href="" ng-click="editMapping(mapping)"><span
               class="glyphicon glyphicon-pencil"></span></a>
         </div>
-        <div ng-switch-when="quick">
-          <pre><code>{{mapping.json}}</code></pre>
-        </div>
-        <div ng-switch-when="basic" hljs source="mapping.json" language="json"></div>
-        <div ng-switch-when="full">
-          <div ui-codemirror="{
-              lineNumbers: true,
-              theme:'rainbow',
-              lineWrapping : true,
-              json: true,
-              mode: 'javascript',
-              readOnly: 'nocursor',
-              matchBrackets: true
-            }" ng-model="mapping.json"></div>
-        </div>
-        <!-- -->
+        <div hljs source="mapping.json" language="json"></div>
       </td>
     </tr>
     </tbody>

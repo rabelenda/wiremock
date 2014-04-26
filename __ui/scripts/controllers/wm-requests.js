@@ -2,7 +2,6 @@ angular.module('wmRequests', []).controller('RequestListCtrl', function ($scope,
 $localStorage) {
   $scope.$storage = $localStorage.$default({
     bodyDecoding : "raw",
-    requestsView : "quick",
     showHeaders : true
   });
   $scope.loading = 0;
@@ -13,12 +12,6 @@ $localStorage) {
     {"value" : "utf8", "label" : "UTF-8 Body"}
   ]
 
-  $scope.viewOptions = [
-    {"value" : "quick", "label" : "Quick View"},
-    {"value" : "basic", "label" : "Basic View"},
-    {"value" : "full", "label" : "Full View"}
-  ]
-  
   $scope.search= function() {
     $scope.filteredRequests = $filter("filter")($scope.requests, $scope.$storage.requestsQuery);
   }
