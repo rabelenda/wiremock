@@ -20,7 +20,7 @@ import com.github.tomakehurst.wiremock.admin.AdminTasks;
 import com.github.tomakehurst.wiremock.core.Admin;
 
 import static com.github.tomakehurst.wiremock.common.LocalNotifier.notifier;
-import static com.github.tomakehurst.wiremock.core.WireMockApp.ADMIN_CONTEXT_ROOT;
+import static com.github.tomakehurst.wiremock.WireMockServer.ADMIN_CONTEXT_ROOT;
 
 public class AdminRequestHandler extends AbstractRequestHandler {
 

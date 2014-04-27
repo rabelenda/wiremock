@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011 Thomas Akehurst
+ * Copyright (C) 2014 Roger Abelenda
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+/**
+ *
+ */
 package com.github.tomakehurst.wiremock.admin;
 
+import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.core.Admin;
 import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
+import com.github.tomakehurst.wiremock.stubbing.ListStubFilesResult;
 
-import static com.github.tomakehurst.wiremock.WireMockServer.ADMIN_CONTEXT_ROOT;
-
-public class RootRedirectTask implements AdminTask {
+public class ListStubFilesTask implements AdminTask {
 
     @Override
     public ResponseDefinition execute(Admin admin, Request request) {
-        return ResponseDefinition.redirectTo(ADMIN_CONTEXT_ROOT + "/");
+        ListStubFilesResult result = admin.listAllStubFiles();
+        return ResponseDefinitionBuilder.jsonResponse(result);
     }
+
 }

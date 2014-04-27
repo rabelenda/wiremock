@@ -13,43 +13,62 @@
  */
 package com.github.tomakehurst.wiremock.common;
 
-import static com.google.common.base.Charsets.UTF_8;
-
+import com.google.common.base.Function;
 import com.google.common.io.Files;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.google.common.base.Charsets.UTF_8;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newArrayList;
 
 public class TextFile {
 
-  private final File file;
+    private final File file;
+    private String relativePath;
 
-  public TextFile(final String filePath) {
-    file = new File(filePath);
-  }
-
-  public TextFile(final File file) {
-    this.file = file;
-  }
-
-  public String readContents() {
-    try {
-      final String json = Files.toString(file, UTF_8);
-      return json;
-    } catch (final IOException ioe) {
-      throw new RuntimeException(ioe);
+    public TextFile(final String rootPath, final String relativePath) {
+        this.relativePath = relativePath;
+        file = new File(rootPath + File.separator + relativePath);
     }
-  }
 
-  public String name() {
-    return file.getName();
-  }
+    public TextFile(final File file) {
+        this.file = file;
+    }
 
-  public String path() {
-    return file.getPath();
-  }
+    public String readContents() {
+        try {
+            final String json = Files.toString(file, UTF_8);
+            return json;
+        } catch (final IOException ioe) {
+            throw new RuntimeException(ioe);
+        }
+    }
 
-  @Override
-  public String toString() {
-    return file.getPath();
-  }
+    public String name() {
+        return file.getName();
+    }
+
+    public String path() {
+        return file.getPath();
+    }
+
+    public String relativePath() {
+        return relativePath;
+    }
+
+    @Override
+    public String toString() {
+        return file.getPath();
+    }
+
+    public static ArrayList<String> getRelativePaths(List<TextFile> fileList) {
+        return newArrayList(transform(fileList, new Function<TextFile, String>() {
+            public String apply(TextFile input) {
+                return input.relativePath();
+            }
+        }));
+    }
 }

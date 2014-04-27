@@ -67,7 +67,7 @@ public class ResponseDefinition {
 	}
 
     private byte[] resolvedBody(MatchedGroups groups) {
-        return String.format(bodyTemplate, groups.toArray()).getBytes(Charset.forName(UTF_8.name()));
+        return String.format(bodyTemplate, (Object[]) groups.toArray()).getBytes(Charset.forName(UTF_8.name()));
     }
 
 	public HttpHeaders getHeaders() {

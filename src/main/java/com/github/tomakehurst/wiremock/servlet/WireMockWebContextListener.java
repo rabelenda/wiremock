@@ -16,6 +16,7 @@
 package com.github.tomakehurst.wiremock.servlet;
 
 import com.github.tomakehurst.wiremock.Log4jConfiguration;
+import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.Log4jNotifier;
 import com.github.tomakehurst.wiremock.common.Notifier;
 import com.github.tomakehurst.wiremock.common.ServletContextFileSource;
@@ -25,13 +26,13 @@ import com.github.tomakehurst.wiremock.global.NotImplementedRequestDelayControl;
 import com.github.tomakehurst.wiremock.http.*;
 import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsLoader;
 
+import com.github.tomakehurst.wiremock.standalone.StubFilesRepository;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 
 public class WireMockWebContextListener implements ServletContextListener {
 
-    private static final String FILES_ROOT = "__files";
     private static final String APP_CONTEXT_KEY = "WireMockApp";
     private static final String FILE_SOURCE_ROOT_KEY = "WireMockFileSourceRoot";
     private static final String JOURNAL_CAPACITY_KEY = "WireMockJournalCapacity";
@@ -45,18 +46,19 @@ public class WireMockWebContextListener implements ServletContextListener {
         ServletContextFileSource fileSource = new ServletContextFileSource(context, fileSourceRoot);
         Log4jConfiguration.configureLogging(true);
 
-        JsonFileMappingsLoader defaultMappingsLoader = new JsonFileMappingsLoader(fileSource.child("mappings"));
+        JsonFileMappingsLoader defaultMappingsLoader = new JsonFileMappingsLoader(fileSource.child(WireMockServer.MAPPINGS_ROOT));
         MappingsSaver mappingsSaver = new NotImplementedMappingsSaver();
         WireMockApp wireMockApp = new WireMockApp(
                 new NotImplementedRequestDelayControl(),
                 false,
                 defaultMappingsLoader,
                 mappingsSaver,
+                new StubFilesRepository(fileSource.child(WireMockServer.FILES_ROOT)),
                 journalCapacity,
                 new NotImplementedContainer());
         AdminRequestHandler adminRequestHandler = new AdminRequestHandler(wireMockApp, new BasicResponseRenderer());
         StubRequestHandler stubRequestHandler = new StubRequestHandler(wireMockApp,
-                new StubResponseRenderer(fileSource.child(FILES_ROOT),
+                new StubResponseRenderer(fileSource.child(WireMockServer.FILES_ROOT),
                         wireMockApp.getGlobalSettingsHolder(),
                         new ProxyResponseRenderer()));
         context.setAttribute(APP_CONTEXT_KEY, wireMockApp);

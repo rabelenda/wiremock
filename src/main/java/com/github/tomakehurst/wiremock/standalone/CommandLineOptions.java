@@ -20,11 +20,10 @@ import com.github.tomakehurst.wiremock.common.*;
 import com.github.tomakehurst.wiremock.core.Options;
 import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableMap;
-import joptsimple.OptionParser;
-import joptsimple.OptionSet;
-
 import java.io.IOException;
 import java.io.StringWriter;
+import joptsimple.OptionParser;
+import joptsimple.OptionSet;
 
 public class CommandLineOptions implements Options {
 	

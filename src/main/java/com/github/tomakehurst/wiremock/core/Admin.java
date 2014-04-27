@@ -18,6 +18,7 @@ package com.github.tomakehurst.wiremock.core;
 import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.stubbing.ListStubFilesResult;
 import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
@@ -31,6 +32,7 @@ public interface Admin {
 	void resetMappings();
 	void resetScenarios();
     void resetToDefaultMappings();
+    ListStubFilesResult listAllStubFiles();
 	VerificationResult countRequestsMatching(RequestPattern requestPattern);
     FindRequestsResult findRequestsMatching(RequestPattern requestPattern);
     void resetRequestsJournal();
@@ -38,4 +40,6 @@ public interface Admin {
     void addSocketAcceptDelay(RequestDelaySpec spec);
     void shutdownServer();
     GlobalSettings getGlobalSettings();
+
+
 }

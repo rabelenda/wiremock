@@ -22,6 +22,7 @@ import com.github.tomakehurst.wiremock.global.GlobalSettings;
 import com.github.tomakehurst.wiremock.global.RequestDelaySpec;
 import com.github.tomakehurst.wiremock.http.HttpClientFactory;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
+import com.github.tomakehurst.wiremock.stubbing.ListStubFilesResult;
 import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
@@ -94,6 +95,14 @@ public class HttpAdminClient implements Admin {
     @Override
     public void resetToDefaultMappings() {
         postJsonAssertOkAndReturnBody(urlFor(ResetToDefaultMappingsTask.class), null, HTTP_OK);
+    }
+
+    @Override
+    public ListStubFilesResult listAllStubFiles() {
+        String body = getJsonAssertOkAndReturnBody(
+                urlFor(RootTask.class),
+                HTTP_OK);
+        return Json.read(body, ListStubFilesResult.class);
     }
 
 	@Override

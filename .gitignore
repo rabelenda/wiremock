@@ -58,3 +58,4 @@ wiremock.iws
 ########
 copy-admin.sh
 mappings
+__files

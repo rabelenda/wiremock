@@ -20,17 +20,22 @@
         <button type="button" class="close" ng-click="$hide()">&times;</button>
         <h4 class="modal-title">Edit Mapping</h4>
       </div>
-      <div class="modal-body">
-        <span class="glyphicon glyphicon-file"></span><span> {{editingMapping.filePath}}</span>
+      <div class="modal-body" style="display: inline-block;">
+        <form>
+            <div class="input-group" style="margin-bottom: 5px;">
+              <span class="input-group-addon"><span class="glyphicon glyphicon-file"></span></span>
+              <input type="text" ng-model="editingMapping.filePath" class="form-control">
+            </div>
+            <div ui-codemirror="{
+                lineNumbers: true,
+                theme:'rainbow',
+                lineWrapping : true,
+                json: true,
+                mode: 'javascript',
+                matchBrackets: true
+              }" ng-model="editingMapping.json"></div>
 
-        <div ui-codemirror="{
-              lineNumbers: true,
-              theme:'rainbow',
-              lineWrapping : true,
-              json: true,
-              mode: 'javascript',
-              matchBrackets: true
-            }" ng-model="editingMapping.json"></div>
+        </form>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>

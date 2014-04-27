@@ -23,19 +23,16 @@ import com.github.tomakehurst.wiremock.http.Request;
 import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
-import com.github.tomakehurst.wiremock.stubbing.InMemoryStubMappings;
-import com.github.tomakehurst.wiremock.stubbing.ListStubMappingsResult;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.stubbing.StubMappings;
-import com.github.tomakehurst.wiremock.verification.*;
+import com.github.tomakehurst.wiremock.standalone.StubFilesRepository;
+import com.github.tomakehurst.wiremock.stubbing.*;
+import com.github.tomakehurst.wiremock.verification.FindRequestsResult;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import com.github.tomakehurst.wiremock.verification.RequestJournalDisabledException;
+import com.github.tomakehurst.wiremock.verification.VerificationResult;
 import com.github.tomakehurst.wiremock.verification.journal.MutableCapacityJournal;
-
 import java.util.List;
 
 public class WireMockApp implements StubServer, Admin {
-    
-    public static final String FILES_ROOT = "__files";
-    public static final String ADMIN_CONTEXT_ROOT = "/__admin";
 
     private final StubMappings stubMappings;
     private final MutableCapacityJournal requestJournal;
@@ -45,12 +42,14 @@ public class WireMockApp implements StubServer, Admin {
     private final MappingsLoader defaultMappingsLoader;
     private final Container container;
     private final MappingsSaver mappingsSaver;
+    private final StubFilesRepository stubFilesRepository;
 
     public WireMockApp(
             RequestDelayControl requestDelayControl,
             boolean browserProxyingEnabled,
             MappingsLoader defaultMappingsLoader,
             MappingsSaver mappingsSaver,
+            StubFilesRepository stubFilesRepository,
             Integer journalCapacity,
             Container container) {
         this.requestDelayControl = requestDelayControl;
@@ -60,6 +59,7 @@ public class WireMockApp implements StubServer, Admin {
         globalSettingsHolder = new GlobalSettingsHolder();
         setupGlobalSettings(journalCapacity);
         stubMappings = new InMemoryStubMappings();
+        this.stubFilesRepository = stubFilesRepository;
         requestJournal = new MutableCapacityJournal(journalCapacity);
         this.container = container;
         loadDefaultMappings();
@@ -127,6 +127,11 @@ public class WireMockApp implements StubServer, Admin {
     @Override
     public void resetScenarios() {
         stubMappings.resetScenarios();
+    }
+
+    @Override
+    public ListStubFilesResult listAllStubFiles() {
+        return stubFilesRepository.list();
     }
 
     @Override

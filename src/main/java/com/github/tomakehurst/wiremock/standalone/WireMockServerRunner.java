@@ -13,11 +13,6 @@
  */
 package com.github.tomakehurst.wiremock.standalone;
 
-import static com.github.tomakehurst.wiremock.WireMockServer.FILES_ROOT;
-import static com.github.tomakehurst.wiremock.WireMockServer.MAPPINGS_ROOT;
-import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
-import static java.lang.System.out;
-
 import com.github.tomakehurst.wiremock.Log4jConfiguration;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.common.FileSource;
@@ -25,6 +20,9 @@ import com.github.tomakehurst.wiremock.http.ResponseDefinition;
 import com.github.tomakehurst.wiremock.matching.RequestPattern;
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
+
+import static com.github.tomakehurst.wiremock.http.RequestMethod.ANY;
+import static java.lang.System.out;
 
 public class WireMockServerRunner {
 
@@ -40,9 +38,9 @@ public class WireMockServerRunner {
 
     FileSource fileSource = options.filesRoot();
     fileSource.createIfNecessary();
-    FileSource filesFileSource = fileSource.child(FILES_ROOT);
+    FileSource filesFileSource = fileSource.child(WireMockServer.FILES_ROOT);
     filesFileSource.createIfNecessary();
-    FileSource mappingsFileSource = fileSource.child(MAPPINGS_ROOT);
+    FileSource mappingsFileSource = fileSource.child(WireMockServer.MAPPINGS_ROOT);
     mappingsFileSource.createIfNecessary();
 
     wireMockServer = new WireMockServer(options);

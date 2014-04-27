@@ -13,16 +13,15 @@
  */
 package com.github.tomakehurst.wiremock.standalone;
 
-import static com.google.common.collect.Iterables.filter;
-
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.common.TextFile;
 import com.github.tomakehurst.wiremock.stubbing.JsonStubMappingCreator;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import com.google.common.base.Predicate;
-import java.io.File;
 import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.collect.Iterables.filter;
 
 public class JsonFileMappingsLoader implements MappingsLoader {
 
@@ -42,13 +41,8 @@ public class JsonFileMappingsLoader implements MappingsLoader {
     Iterable<TextFile> mappingFiles = filter(fileMappings, byFileExtension("json"));
     for (TextFile mappingFile : mappingFiles) {
       jsonStubMappingCreator
-          .addMappingFrom(getMappingPath(mappingFile), mappingFile.readContents());
+          .addMappingFrom(mappingFile.relativePath(), mappingFile.readContents());
     }
-  }
-
-  private String getMappingPath(TextFile mappingFile) {
-    return mappingFile.path().substring(
-        mappingsFileSource.getPath().length() + File.separator.length());
   }
 
   private Predicate<TextFile> byFileExtension(final String extension) {

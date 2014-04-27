@@ -34,6 +34,7 @@ import com.github.tomakehurst.wiremock.servlet.TrailingSlashFilter;
 import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsLoader;
 import com.github.tomakehurst.wiremock.standalone.JsonFileMappingsSaver;
 import com.github.tomakehurst.wiremock.standalone.MappingsLoader;
+import com.github.tomakehurst.wiremock.standalone.StubFilesRepository;
 import com.github.tomakehurst.wiremock.stubbing.StubMappingJsonRecorder;
 import com.github.tomakehurst.wiremock.stubbing.StubMappings;
 import org.mortbay.jetty.Handler;
@@ -45,7 +46,6 @@ import org.mortbay.jetty.servlet.ServletHolder;
 
 import java.util.Map;
 
-import static com.github.tomakehurst.wiremock.core.WireMockApp.ADMIN_CONTEXT_ROOT;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static com.github.tomakehurst.wiremock.servlet.HandlerDispatchingServlet.SHOULD_FORWARD_TO_FILES_CONTEXT;
 import static com.google.common.base.Preconditions.checkState;
@@ -53,9 +53,10 @@ import static com.google.common.collect.Maps.newHashMap;
 
 public class WireMockServer implements Container {
 
-	public static final String FILES_ROOT = "__files";
+    public static final String FILES_ROOT = "__files";
     public static final String MAPPINGS_ROOT = "mappings";
-	private static final String FILES_URL_MATCH = String.format("/%s/*", FILES_ROOT);
+    public static final String ADMIN_CONTEXT_ROOT = "/__admin";
+    private static final String FILES_URL_MATCH = String.format("/%s/*", FILES_ROOT);
 	
 	private final WireMockApp wireMockApp;
     private final AdminRequestHandler adminRequestHandler;
@@ -88,11 +89,13 @@ public class WireMockServer implements Container {
         if (options.requestJournalDisabled()) {
             journalCapacity = 0;
         }
+        StubFilesRepository stubFilesRepository = new StubFilesRepository(fileSource.child(FILES_ROOT));
         wireMockApp = new WireMockApp(
                 requestDelayControl,
                 options.browserProxyingEnabled(),
                 defaultMappingsLoader,
                 mappingsSaver,
+                stubFilesRepository,
                 journalCapacity,
                 this
         );
@@ -105,7 +108,7 @@ public class WireMockServer implements Container {
     }
 
     private MappingsLoader makeDefaultMappingsLoader() {
-        FileSource mappingsFileSource = fileSource.child("mappings");
+        FileSource mappingsFileSource = fileSource.child(MAPPINGS_ROOT);
         if (mappingsFileSource.exists()) {
             return new JsonFileMappingsLoader(mappingsFileSource);
         } else {
