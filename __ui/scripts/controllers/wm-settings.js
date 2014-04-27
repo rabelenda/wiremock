@@ -19,8 +19,16 @@ angular.module('wmSettings', []).controller('SettingsCtrl', function ($scope, $h
   $scope.refresh = function() {
     startRequest();
     $http.post('/__admin/settings/get').success(function(data) {
-      $scope.fixedDelay = data.fixedDelay;
-      $scope.journalCapacity = data.journalCapacity;
+      $scope.settings = data;
+      endRequest();
+    }). error(function(data, status) {
+      failedRequest(data, status);
+    });
+  };
+
+  $scope.save = function() {
+    startRequest();
+    $http.post('/__admin/settings/set',$scope.settings).success(function(data) {
       endRequest();
     }). error(function(data, status) {
       failedRequest(data, status);

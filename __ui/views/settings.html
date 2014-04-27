@@ -24,6 +24,15 @@
   <span class="label label-warning" ng-show="loading > 0">Loading...</span>
 </div>
 <div class="row">
-  <label>Fixed Delay</label><span> {{fixedDelay}}</span><br/>
-  <label>Jounal Capacity</label><span> {{journalCapacity}}</span>
+  <form role="form">
+    <div class="form-group">
+      <label for="fixedDelay">Fixed Delay</label>
+      <input type="number" class="form-control" id="fixedDelay" ng-model="settings.fixedDelay" placeholder="Undefined">
+    </div>
+    <div class="form-group">
+      <label for="journalCapacity">Journal Capacity</label>
+      <input type="number" class="form-control" id="journalCapacity" ng-model="settings.journalCapacity" placeholder="Unbounded">
+    </div>
+    <a class="btn btn-warning" href="" ng-click="save()"><span class="glyphicon glyphicon-ok"></span> Save</a>
+  </form>
 </div>

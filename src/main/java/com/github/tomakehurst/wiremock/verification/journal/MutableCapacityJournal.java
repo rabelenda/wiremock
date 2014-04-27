@@ -50,6 +50,7 @@ public class MutableCapacityJournal implements RequestJournal {
             List<LoggedRequest> reqs = impl.getAllRequests();
             impl = getImplFromCapacity(capacity);
             impl.load(reqs);
+            this.capacity = capacity;
         }
     }
 
