@@ -33,8 +33,6 @@
     <a class="btn btn-warning" href="" ng-click="reload()"><span
         class="glyphicon glyphicon-upload"></span> Reload from files</a>
     <span class="label label-warning" ng-show="loading > 0">Loading...</span>
-    <a class="btn btn-success pull-right" href="" ng-click="newMapping()"><span
-        class="glyphicon glyphicon-plus"></span></a>
   </div>
 </div>
 <div class="row">
@@ -42,13 +40,6 @@
     <tbody>
     <tr ng-repeat="mapping in filteredMappings">
       <td class="col-md-12" ng-dblclick="editMapping(mapping)">
-        <div style="padding-bottom: 5px">
-          <span class="glyphicon glyphicon-file"></span><span> {{mapping.filePath}}</span>
-          <a class="btn btn-danger btn-xs pull-right" href="" ng-click="deleteMapping(mapping)"
-             style="margin-left: 5px"><span class="glyphicon glyphicon-minus"></span></a>
-          <a class="btn btn-warning btn-xs pull-right" href="" ng-click="editMapping(mapping)"><span
-              class="glyphicon glyphicon-pencil"></span></a>
-        </div>
         <div hljs source="mapping.json" language="json"></div>
       </td>
     </tr>

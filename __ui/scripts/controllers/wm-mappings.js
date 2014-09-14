@@ -1,5 +1,5 @@
 angular.module('wmMappings', []).controller('MappingListCtrl', function ($scope, $http, $filter,
-$localStorage, $modal, $log) {
+$localStorage) {
   $scope.loading = 0;
   $scope.$storage = $localStorage;
 
@@ -60,25 +60,6 @@ $localStorage, $modal, $log) {
       failedRequest(data, status);
     });
   };
-
-  var mappingDetailModal = $modal({scope: $scope, template: 'views/modals/mappingDetail.html', show: false});
-
-  $scope.editMapping = function(mapping){
-    $scope.editingMapping = mapping;
-    mappingDetailModal.show();
-    mappingDetailModal.$promise.then(function() {
-      $scope.editing = true;
-    });
-  };
-
-  $scope.newMapping = function(){
-    $scope.editingMapping = {};
-    mappingDetailModal.show();
-  };
-
-  $scope.saveMapping = function() {
-    mappingDetailModal.hide();
-  }
 
   $scope.refresh();
 
