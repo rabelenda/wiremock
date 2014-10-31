@@ -10,11 +10,11 @@ $localStorage) {
     {"value" : "raw", "label" : "Raw Body"},
     {"value" : "latin","label" : "Latin Body"},
     {"value" : "utf8", "label" : "UTF-8 Body"}
-  ]
+  ];
 
   $scope.search= function() {
     $scope.filteredRequests = $filter("filter")($scope.requests, $scope.$storage.requestsQuery);
-  }
+  };
 
   // uncomment to search on every key hit
   // $scope.$watch("$storage.query", $scope.search);
@@ -53,7 +53,7 @@ $localStorage) {
       request.decodedBody = request.body;
       request.failedDecoding = true;
     }
-  }
+  };
 
   function getHttpRequest(req, showHeaders) {
     var ret = req.method + " " + req.url + " HTTP/1.1\n";
@@ -62,28 +62,28 @@ $localStorage) {
         ret += header + ": " + req.headers[header] + "\n";
       }
     }
-    ret += "\n" + req.body;
+    ret += "\n" + req.decodedBody;
     return ret;
   }
 
   $scope.updateHttpRequest= function(request) {
     request.httpRequest = getHttpRequest(request, $scope.$storage.showHeaders);
-  }
+  };
 
   $scope.updatedDecoding= function() {
-    var reqs = $scope.requests
+    var reqs = $scope.requests;
     for (var i=0, len=reqs.length; i<len; i++) {
       $scope.updateDecodedBody(reqs[i]);
       $scope.updateHttpRequest(reqs[i]);
     }
-  }
+  };
 
   $scope.updatedShowHeaders= function() {
-    var reqs = $scope.requests
+    var reqs = $scope.requests;
     for (var i=0, len=reqs.length; i<len; i++) {
       $scope.updateHttpRequest(reqs[i]);
     }
-  }
+  };
 
   $scope.refresh = function() {
     startRequest();
